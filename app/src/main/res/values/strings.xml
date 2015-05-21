@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Swallow</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Action Setting</string>
+    <string name="input_text_hint">投稿するぜ</string>
+    <string name="submit_text">submit</string>
+    <string name="submit_cancel_text">Cancel</string>
+    <string name="tag_select_button_text">タグを選択してちょ</string>
+    <string name="ok_text">OK</string>
+    <string name="tag_select_alert_text">タグは必ず1つ以上選択してください</string>
+    <string name="tag_add_button_text">タグ増やすよ～</string>
+    <string name="tag_add_hint_text">新しいタグを書くべし</string>
+    <string name="cancel_text">やっぱナシで</string>
+    <string name="tag_add_failed_text">タグの追加に失敗しました</string>
+    <string name="message_send_failed_text">メッセージの送信に失敗しました</string>
+    <string name="tag_load_failed_text">タグの読み込みに失敗しました</string>
+    <string name="message_load_failed_text">メッセージの読み込みに失敗しました</string>
+    <string name="file_upload_title">ファイルアップロード</string>
+    <string name="drawer_open">ドロワー、開きます</string>
+    <string name="drawer_close">ドロワー、閉じます</string>
+    <string name="message_delete_failed_text">メッセージの削除に失敗しました</string>
+    <string name="user_load_failed_text">ユーザー情報の取得に失敗しました</string>
+    <string name="user_name_input_hint">ユーザー名を入力</string>
+    <string name="password_input_hint">パスワードを入力</string>
+    <string name="login_button_text">ログイン</string>
+    <string name="tag_search_box_hint">タグを検索</string>
+    <string name="seach_icon_description">タグを検索</string>
+    <string name="message_view_user_icon_description">ユーザーアイコン</string>
+    <string name="message_view_fav_icon_description">ふぁぼマーク</string>
+    <string name="tag_icon_description">タグ</string>
+    <string name="message_send_text">ぼやく</string>
+    <string name="file_upload_icon_description">ファイルアップロード</string>
+    <string name="source_code_upload_icon_description">ソースコードアップロード</string>
+    <string-array name="file_upload_dialog_items">
+        <item>ギャラリーから選択</item>
+        <item >ファイルを選択</item>
+    </string-array>
+
+</resources>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:logo="@drawable/ic_launcher" >
+
+    <!-- The main content view -->
+
+    <ViewFlipper
+        android:id="@+id/flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </ViewFlipper>
+
+    <!-- The navigation drawer -->
+
+    <LinearLayout
+        android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#fff"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <EditText
+                android:id="@+id/drawer_search_box"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/tag_search_box_hint"
+                android:singleLine="true" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/seach_icon_description"
+                android:src="@android:drawable/ic_search_category_default" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/drawer_tag_select_list"
+            android:layout_width="match_parent"
+            android:layout_height="360dp"
+            android:choiceMode="multipleChoice"
+            android:gravity="top"
+            android:orientation="vertical" >
+        </ListView>
+
+        <Button
+            android:id="@+id/setting_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="設定" />
+    </LinearLayout>
+
+</android.support.v4.widget.DrawerLayout>
