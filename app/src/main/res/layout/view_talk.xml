@@ -30,12 +30,13 @@
                     android:id="@+id/detail_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="kwsk" />
+                    android:text="kwsk"
+                    android:textAllCaps="false"/>
 
                 <EditText
                     android:id="@+id/input_text_dummy"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="0.5"
                     android:gravity="center_vertical|start"
                     android:hint="@string/input_text_hint"
@@ -48,7 +49,8 @@
                     android:layout_height="wrap_content"
                     android:background="#0af"
                     android:text="@string/message_send_text"
-                    android:textColor="#fff" />
+                    android:textColor="#fff"
+                    android:enabled="true" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

@@ -1,8 +1,5 @@
 package com.trap.swallow.talk;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -14,6 +11,9 @@ import android.widget.Toast;
 
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.swallow.R;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 
 
 public class MyUtils {
@@ -72,11 +72,11 @@ public class MyUtils {
 
 	public static final Bitmap getImageFromPath(Resources res, String mimeType) {
 		if (mimeType.startsWith("application/zip")) {
-			return BitmapFactory.decodeResource(res, R.drawable.icon_zip);
+			return BitmapFactory.decodeResource(res, R.drawable.zip);
 		} else if (mimeType.startsWith("application/pdf")) {
-			return BitmapFactory.decodeResource(res, R.drawable.icon_pdf);
+			return BitmapFactory.decodeResource(res, R.drawable.pdf);
 		} else if (mimeType.startsWith("text/plain")) {
-			return BitmapFactory.decodeResource(res, R.drawable.icon_txt);
+			return BitmapFactory.decodeResource(res, R.drawable.text);
 		} else if (mimeType.startsWith("swallow/folder")) {
 			return BitmapFactory.decodeResource(res, R.drawable.icon_folder);
 		}

@@ -10,8 +10,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
-import android.text.Spannable;
-import android.text.style.UnderlineSpan;
+import android.text.Html;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageButton;
@@ -41,9 +40,6 @@ public class MessageView extends LinearLayout{
 
     public final LayoutParams lp;
     public final Message mInfo;
-
-    public int arrivalY = 0;
-    public float t;
 
     public int answerIndex;
 
@@ -114,11 +110,7 @@ public class MessageView extends LinearLayout{
         //名前
         {
             TextView nameView = (TextView)v.findViewById(R.id.name_text);
-            String name = sender.getUserName();
-            Spannable t = Spannable.Factory.getInstance().newSpannable(name);
-            UnderlineSpan us = new UnderlineSpan();
-            t.setSpan(us, 0, name.length(), t.getSpanFlags(us));
-            nameView.setText(name);
+            nameView.setText(Html.fromHtml("<u>" + sender.getUserName() + "</u>"));
         }
 
         //時間
@@ -128,7 +120,7 @@ public class MessageView extends LinearLayout{
             c.setTimeInMillis(mInfo.getPosted());
             int h = c.get(Calendar.HOUR_OF_DAY);
             int m = c.get(Calendar.MINUTE);
-            timeView.setText((h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m);
+            timeView.setText(Html.fromHtml("<u>" + (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + "</u>"));
         }
 
         //ファイル
@@ -288,8 +280,9 @@ public class MessageView extends LinearLayout{
             final int favNum = mInfo.getFavCount();
             final TextView favNumView = (TextView)v.findViewById(R.id.fav_num_text);
             favNumView.setText(String.valueOf(favNum));
-            ImageButton starView = (ImageButton)v.findViewById(R.id.star_button);
-            starView.setOnClickListener(new OnClickListener() {
+            
+            ImageButton goodButton = (ImageButton)v.findViewById(R.id.good_button);
+            goodButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int n = favNum + 1;
@@ -297,7 +290,18 @@ public class MessageView extends LinearLayout{
                     SCM.scm.swallow.createFavorite(MessageView.this.mInfo.getPostID(), n);
                 }
             });
-            starView.setBackgroundColor(Color.argb(0, 0, 0, 0));
+            goodButton.setBackgroundColor(Color.argb(0, 0, 0, 0));
+            
+            ImageButton badButton = (ImageButton)v.findViewById(R.id.bad_button);
+            badButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int n = favNum - 1;
+                    favNumView.setText(String.valueOf(n));
+                    SCM.scm.swallow.createFavorite(MessageView.this.mInfo.getPostID(), n);
+                }
+            });
+            badButton.setBackgroundColor(Color.argb(0, 0, 0, 0));
         }
 
         //タグ
@@ -310,6 +314,8 @@ public class MessageView extends LinearLayout{
                     TextView textView = new TextView(context);
                     textView.setText(tagName);
                     textView.setTextColor(tagColors[i % tagColors.length]);
+                    textView.setGravity(Gravity.CENTER);
+                    textView.setTextSize(10);
                     tagLayout.addView(textView);
                 }
             }

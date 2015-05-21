@@ -16,28 +16,26 @@
         android:layout_marginTop="5dp"
         android:orientation="horizontal" >
 
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:contentDescription="@string/tag_icon_description"
-            android:src="@drawable/tag_icon" />
 
         <Button
             android:id="@+id/tag_select_button"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:ellipsize="end"
             android:gravity="center"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:textAllCaps="false"
+            android:text="aaa"/>
 
         <Button
             android:id="@+id/send_message_button"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="#0af"
             android:text="@string/message_send_text"
             android:textColor="#fff" />
+
     </LinearLayout>
 
     <ScrollView
@@ -82,17 +80,54 @@
         android:layout_below="@id/file_thumbail_layout"
         android:orientation="horizontal" >
 
-        <Button
-            android:id="@+id/file_upload_button"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="35dp"
-            android:layout_marginStart="35dp"
-            android:background="@android:drawable/ic_menu_upload"
-            android:contentDescription="@string/source_code_upload_icon_description" />
+            android:layout_marginLeft="20sp"
+            android:layout_marginStart="20sp"
+            android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <Button
+                    android:id="@+id/file_upload_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:background="@android:drawable/ic_menu_upload"
+                    android:contentDescription="@string/source_code_upload_icon_description" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="File Upload"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5sp"
+                android:layout_marginStart="5sp"
+                android:orientation="vertical">
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="I wanna check KIDOKU"/>
+            </LinearLayout>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="アンケートをつける"
+                android:textSize="10sp"/>
+        </LinearLayout>
     </RelativeLayout>
 
 </RelativeLayout>

@@ -21,8 +21,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
-        android:paddingEnd="5sp"
-        android:paddingStart="5sp" >
+        android:paddingLeft="5sp"
+        android:paddingStart="5sp"
+        android:paddingBottom="10sp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -42,22 +43,43 @@
                 android:gravity="start"
                 android:orientation="horizontal" >
 
-                <ImageButton
-                    android:id="@+id/star_button"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:background="#0000"
-                    android:contentDescription="@string/message_view_fav_icon_description"
-                    android:src="@drawable/star" />
+                    android:layout_gravity="start"
+                    android:gravity="start"
+                    android:orientation="vertical">
+                    <ImageButton
+                        android:id="@+id/good_button"
+                        android:layout_width="22sp"
+                        android:layout_height="22sp"
+                        android:layout_gravity="start"
+                        android:layout_marginBottom="5sp"
+                        android:scaleType="fitXY"
+                        android:background="#0000"
+                        android:contentDescription="@string/message_view_fav_icon_description"
+                        android:src="@drawable/good" />
+                    <ImageButton
+                        android:id="@+id/bad_button"
+                        android:layout_width="22sp"
+                        android:layout_height="22sp"
+                        android:layout_gravity="start"
+                        android:scaleType="fitXY"
+                        android:background="#0000"
+                        android:contentDescription="@string/message_view_fav_icon_description"
+                        android:src="@drawable/bad" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/fav_num_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="18sp"
+                    android:layout_marginStart="2sp"
+                    android:layout_marginLeft="2sp"
+                    android:textSize="15sp"
                     android:layout_gravity="center"/>
             </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -126,14 +148,14 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="2sp"
             android:layout_height="match_parent"
             android:background="@drawable/dot_line"
             android:orientation="vertical"/>
 
         <LinearLayout
             android:id="@+id/tag_layout"
-            android:layout_width="wrap_content"
+            android:layout_width="50sp"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
         </LinearLayout>
