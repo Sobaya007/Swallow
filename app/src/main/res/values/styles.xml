@@ -6,7 +6,12 @@
         <item name="windowActionBar">true</item>
         <item name="colorPrimary">#005C92</item>
         <item name="colorPrimaryDark">#1976D2</item>
-        <item name="colorAccent">#44FF88</item>
+        <item name="colorAccent">#005C92</item>
+    </style>
+
+
+    <style name="ReceivedCheckBoxStyle" parent="android:Widget.CompoundButton.CheckBox">
+        <item name="android:button">@null</item>
     </style>
 
 </resources>

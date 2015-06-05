@@ -50,12 +50,6 @@
             android:gravity="top"
             android:orientation="vertical" >
         </ListView>
-
-        <Button
-            android:id="@+id/setting_button"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="設定" />
     </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

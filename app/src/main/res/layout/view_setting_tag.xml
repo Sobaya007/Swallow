@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="通知してほしいタグを選択"
+        android:textSize="25sp"
+        android:textColor="@color/background_material_dark"
+        android:layout_margin="10sp" />
+    <ListView
+        android:id="@+id/setting_tag_list"
+        android:layout_width="match_parent"
+        android:layout_height="0sp"
+        android:layout_weight="0.6"
+        android:choiceMode="multipleChoice"
+        android:gravity="top"
+        android:orientation="vertical" >
+    </ListView>
+    <Button
+        android:id="@+id/setting_tag_finish_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="OK"/>
+</LinearLayout>

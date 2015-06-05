@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="15dp"
         android:layout_marginEnd="5dp"
         android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
@@ -30,10 +29,9 @@
 
         <Button
             android:id="@+id/send_message_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#0af"
-            android:text="@string/message_send_text"
+            android:layout_width="52sp"
+            android:layout_height="40sp"
+            android:background="@drawable/send1"
             android:textColor="#fff" />
 
     </LinearLayout>
@@ -58,17 +56,6 @@
 
     </ScrollView>
 
-    <LinearLayout
-        android:id="@+id/file_thumbail_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/input_scroll_view"
-        android:layout_marginEnd="5dp"
-        android:layout_marginStart="5dp"
-        android:orientation="horizontal" >
-
-    </LinearLayout>
-
     <RelativeLayout
         android:id="@+id/input_bottom_option_layout"
         android:layout_width="match_parent"
@@ -77,57 +64,71 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false"
-        android:layout_below="@id/file_thumbail_layout"
+        android:layout_below="@id/input_scroll_view"
         android:orientation="horizontal" >
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20sp"
-            android:layout_marginStart="20sp"
             android:orientation="horizontal">
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <Button
-                    android:id="@+id/file_upload_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"
-                    android:background="@android:drawable/ic_menu_upload"
-                    android:contentDescription="@string/source_code_upload_icon_description" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="File Upload"/>
+                android:id="@+id/file_upload_button_layout"
+                android:layout_width="0sp"
+                android:layout_height="50sp"
+                android:layout_weight="0.25"
+                android:orientation="horizontal"
+                android:gravity="center">
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5sp"
-                android:layout_marginStart="5sp"
-                android:orientation="vertical">
+                android:layout_width="0sp"
+                android:layout_height="50sp"
+                android:layout_weight="0.25"
+                android:gravity="center">
                 <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="I wanna check KIDOKU"/>
+                    android:id="@+id/checkReceivedBox"
+                    android:layout_width="60sp"
+                    android:layout_height="40sp"
+                    style="@style/ReceivedCheckBoxStyle"
+                    android:background="@drawable/received_button_selector"
+                    />
             </LinearLayout>
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="アンケートをつける"
-                android:textSize="10sp"/>
+            <LinearLayout
+                android:layout_width="0sp"
+                android:layout_height="50sp"
+                android:layout_weight="0.25"
+                android:gravity="center">
+                <ImageButton
+                    android:id="@+id/enqueteButton"
+                    android:layout_width="38sp"
+                    android:layout_height="50sp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/enquete_normal_selector"/>
+            </LinearLayout>
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="0sp"-->
+                <!--android:layout_height="50sp"-->
+                <!--android:layout_weight="0.25"-->
+                <!--android:gravity="center">-->
+                <!--<Button-->
+                    <!--android:id="@+id/codeInsertButton"-->
+                    <!--android:layout_width="58sp"-->
+                    <!--android:layout_height="25sp"-->
+                    <!--android:background="@drawable/code_button_selector"/>-->
+            <!--</LinearLayout>/-->
         </LinearLayout>
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/input_explain_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="#f000"
+        android:layout_below="@id/input_bottom_option_layout"
+        android:layout_alignLeft="@+id/input_top_option_layout"
+        android:layout_alignStart="@+id/input_top_option_layout"/>
 
 </RelativeLayout>

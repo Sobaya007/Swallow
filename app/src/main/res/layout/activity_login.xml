@@ -13,7 +13,6 @@
         android:id="@+id/passwordInput"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"
         android:hint="@string/password_input_hint"/>
 
     <Button
@@ -21,5 +20,11 @@
         android:text="@string/login_button_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/register_button"
+        android:text="新規登録"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

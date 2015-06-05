@@ -8,6 +8,7 @@
         android:id="@+id/tag_add_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLength="16"
         android:hint="@string/tag_add_hint_text"/>
 
 </LinearLayout>

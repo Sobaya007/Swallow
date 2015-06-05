@@ -371,16 +371,6 @@
 //
 package com.trap.swallow.talk;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.FloatBuffer;
-import java.util.ArrayList;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -397,6 +387,16 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.GLUtils;
 import android.view.MotionEvent;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.FloatBuffer;
+import java.util.ArrayList;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 public class BackgroundView extends GLSurfaceView implements Renderer, SensorEventListener {
 
@@ -457,8 +457,11 @@ public class BackgroundView extends GLSurfaceView implements Renderer, SensorEve
 	private Bitmap gaussian;
 	private Bitmap gaussian_red;
 
+	public boolean enable;
+
 	public BackgroundView(final Context context) {
 		super(context);
+		enable = MyUtils.sp.getBoolean(MyUtils.BACKGROUND_ENABLE_KEY, false);
 		this.setEGLContextClientVersion(2);	// OpenGL ES 2.0 を使用するように構成します。
 		setRenderer(this);
 
@@ -492,16 +495,21 @@ public class BackgroundView extends GLSurfaceView implements Renderer, SensorEve
 	@Override
 	public void onDrawFrame(GL10 gl) {
 		if (startFlag) {
+			if (enable) {
 
-			touchPhase();
+				touchPhase();
 
-			sortPhase();
+				sortPhase();
 
-			collisionPhase();
+				collisionPhase();
 
-			stepPhase();
+				stepPhase();
 
-			drawPhase();
+				drawPhase();
+			} else {
+				gl.glClearColor(0.8627450980392157f, 0.9411764705882353f, 0.9803921568627451f, 1.0f);
+				gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+			}
 		}
 
 	}

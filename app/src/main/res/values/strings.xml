@@ -33,9 +33,14 @@
     <string name="message_send_text">ぼやく</string>
     <string name="file_upload_icon_description">ファイルアップロード</string>
     <string name="source_code_upload_icon_description">ソースコードアップロード</string>
+    <string name="enquete_button_text">アンケート♪</string>
+    <string name="enquete_add_button_text">追加っ</string>
+    <string name="enquete_add_hint_text">新しいアンケートを書くべし</string>
+    <string name="notification_message_not_found_text">メッセージ情報がありません</string>
     <string-array name="file_upload_dialog_items">
         <item>ギャラリーから選択</item>
         <item >ファイルを選択</item>
     </string-array>
+    <string name="setting_name_text">ユーザー名</string>
 
 </resources>

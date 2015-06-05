@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:focusableInTouchMode="true" >
+    android:focusableInTouchMode="true"
+    android:background="#0000">
 
     <LinearLayout
         android:id="@+id/input_layout"
@@ -26,12 +27,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal" >
 
-                <Button
+                <ImageButton
                     android:id="@+id/detail_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="kwsk"
-                    android:textAllCaps="false"/>
+                    android:layout_marginLeft="10sp"
+                    android:layout_marginStart="10sp"
+                    android:layout_width="68sp"
+                    android:layout_height="50sp"
+                    android:scaleType="fitCenter"
+                    android:textAllCaps="false"
+                    android:background="@drawable/kwsk2_360" />
 
                 <EditText
                     android:id="@+id/input_text_dummy"
@@ -45,10 +49,11 @@
 
                 <Button
                     android:id="@+id/talk_submit_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="#0af"
-                    android:text="@string/message_send_text"
+                    android:layout_width="52sp"
+                    android:layout_height="40sp"
+                    android:layout_marginRight="10sp"
+                    android:layout_marginEnd="10sp"
+                    android:background="@drawable/send1"
                     android:textColor="#fff"
                     android:enabled="true" />
             </LinearLayout>
