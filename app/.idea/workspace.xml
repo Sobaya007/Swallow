@@ -36,12 +36,11 @@
   </component>
   <component name="AndroidLogFilters">
     <option name="TOOL_WINDOW_LOG_LEVEL" value="INFO" />
+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b067ce26-f656-44fe-ba31-739fa7a552e1" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -92,21 +91,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="TalkActivity.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="TalkActivity.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="933" column="28" selection-start-line="933" selection-start-column="28" selection-end-line="933" selection-end-column="28" />
+            <state vertical-scroll-proportion="0.48916408">
+              <caret line="206" column="13" selection-start-line="206" selection-start-column="13" selection-end-line="206" selection-end-column="13" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MessageView.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="MessageView.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.57894737">
-              <caret line="137" column="36" selection-start-line="137" selection-start-column="36" selection-end-line="137" selection-end-column="36" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="513" column="0" selection-start-line="513" selection-start-column="0" selection-end-line="513" selection-end-column="0" />
               <folding>
                 <element signature="e#4962#5399#0" expanded="true" />
                 <element signature="e#5398#5399#0" expanded="true" />
@@ -123,7 +122,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="512" column="19" selection-start-line="512" selection-start-column="19" selection-end-line="512" selection-end-column="19" />
+              <caret line="40" column="20" selection-start-line="40" selection-start-column="20" selection-end-line="40" selection-end-column="20" />
               <folding />
             </state>
           </provider>
@@ -1726,13 +1725,13 @@
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyInstanceIDListenerService.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/login/LogInActivity.java" />
         <option value="$PROJECT_DIR$/src/main/res/layout/view_setting.xml" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java" />
         <option value="$PROJECT_DIR$/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/UserInfo.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java" />
       </list>
     </option>
   </component>
@@ -2801,7 +2800,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="167" />
+      <option name="time" value="176" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -3198,25 +3197,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.47368422">
-          <caret line="79" column="51" selection-start-line="79" selection-start-column="51" selection-end-line="79" selection-end-column="51" />
-          <folding>
-            <element signature="e#1453#1454#0" expanded="true" />
-            <element signature="e#1476#1477#0" expanded="true" />
-            <element signature="e#2021#2022#0" expanded="true" />
-            <element signature="e#2062#2063#0" expanded="true" />
-            <element signature="e#2123#2124#0" expanded="true" />
-            <element signature="e#2165#2166#0" expanded="true" />
-            <element signature="e#2238#2239#0" expanded="true" />
-            <element signature="e#2285#2286#0" expanded="true" />
-            <element signature="e#5330#5385#0" expanded="true" />
-            <element signature="e#5446#5474#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.120743036">
@@ -3225,26 +3205,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="933" column="28" selection-start-line="933" selection-start-column="28" selection-end-line="933" selection-end-column="28" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="512" column="19" selection-start-line="512" selection-start-column="19" selection-end-line="512" selection-end-column="19" />
+          <caret line="98" column="38" selection-start-line="98" selection-start-column="38" selection-end-line="98" selection-end-column="38" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.57894737">
-          <caret line="137" column="36" selection-start-line="137" selection-start-column="36" selection-end-line="137" selection-end-column="36" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="513" column="0" selection-start-line="513" selection-start-column="0" selection-end-line="513" selection-end-column="0" />
           <folding>
             <element signature="e#4962#5399#0" expanded="true" />
             <element signature="e#5398#5399#0" expanded="true" />
@@ -3253,6 +3225,22 @@
             <element signature="e#8742#8743#0" expanded="true" />
             <element signature="e#8840#8841#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="40" column="20" selection-start-line="40" selection-start-column="20" selection-end-line="40" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.48916408">
+          <caret line="206" column="13" selection-start-line="206" selection-start-column="13" selection-end-line="206" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>

@@ -598,10 +598,12 @@ public class TalkManager {
 		//既読をつける
 		//範囲内かつ未読なら既読つける
 		synchronized (messageList) {
-			float y;
+			int[] pos = new int[2];
+			int y;
 			for (MessageView mv : messageList) {
 				synchronized (mv) {
-					y = mv.getY();
+					mv.getLocationInWindow(pos);
+					y = pos[1];
 					//範囲チェック
 					if (-mv.getHeight() <= y && y <= size.y) {
 						String key = MyUtils.HAS_READ_KEY + mv.mInfo.getPostID();

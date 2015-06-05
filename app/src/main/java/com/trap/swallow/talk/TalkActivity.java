@@ -201,7 +201,7 @@ public class TalkActivity extends AppCompatActivity {
 
 		//別スレッドを起動
 		Timer t = new Timer();
-		t.schedule(new Task(), 0, 20); //50FPS
+		t.schedule(new Task(), 0, 1000); //50FPS
 	}
 
 	@Override
