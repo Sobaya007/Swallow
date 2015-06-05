@@ -32,12 +32,20 @@ public class MyUtils {
 	public static final String HAS_READ_KEY = "READ";
 	public static final String ENQUETE_ANSWER_KEY = "ANSWER";
 	public static final String BACKGROUND_ENABLE_KEY = "BG";
+	public static final String MY_USER_ID_KEY = "MY_ID";
 
-	public static final Typeface yojoFont;
-	public static final SharedPreferences sp;
-	static  {
-		sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.singleton);
-		yojoFont = Typeface.createFromAsset(MainActivity.singleton.getAssets(), "ArmedBanana.ttf");
+	public static Typeface yojoFont;
+	public static SharedPreferences sp;
+	static {
+		if (MainActivity.singleton != null) {
+			sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.singleton.getApplicationContext());
+			yojoFont = Typeface.createFromAsset(MainActivity.singleton.getAssets(), "ArmedBanana.ttf");
+		}
+	}
+
+	public static void staticInit(Context context) {
+		sp = PreferenceManager.getDefaultSharedPreferences(context);
+		yojoFont = Typeface.createFromAsset(context.getAssets(), "ArmedBanana.ttf");
 	}
 
 	public static final void showShortToast(Context context, String text) {
@@ -124,17 +132,17 @@ public class MyUtils {
 	 * @throws Exception ファイルが見つからない、アクセスできないときなど
 	 */
 	public static byte[] readFileToByte(String filePath) throws Exception {
-	    byte[] b = new byte[100];
-	    FileInputStream fis = new FileInputStream(filePath);
-	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    while (fis.read(b) > 0) {
-	        baos.write(b);
-	    }
-	    baos.close();
-	    fis.close();
-	    b = baos.toByteArray();
+		byte[] b = new byte[100];
+		FileInputStream fis = new FileInputStream(filePath);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		while (fis.read(b) > 0) {
+			baos.write(b);
+		}
+		baos.close();
+		fis.close();
+		b = baos.toByteArray();
 
-	    return b;
+		return b;
 	}
 
 	public static void scrollDown() {

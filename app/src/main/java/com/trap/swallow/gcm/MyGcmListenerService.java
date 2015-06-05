@@ -22,6 +22,8 @@ import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.ServerTask;
 import com.trap.swallow.server.Swallow;
 import com.trap.swallow.server.SwallowException;
+import com.trap.swallow.server.SwallowImpl;
+import com.trap.swallow.server.SwallowSecurity;
 import com.trap.swallow.swallow.MainActivity;
 import com.trap.swallow.swallow.R;
 import com.trap.swallow.talk.MyUtils;
@@ -48,12 +50,14 @@ public class MyGcmListenerService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         String message = data.getString("PostID");
         sendNotification(message);
-        new ServerTask(TalkActivity.singleton, "更新に失敗しました") {
-            @Override
-            public void doInSubThread() throws SwallowException {
-                TalkActivity.singleton.tvManager.loadNextMessage();
-            }
-        };
+        if (TalkActivity.singleton != null) {
+            new ServerTask(TalkActivity.singleton, "更新に失敗しました") {
+                @Override
+                public void doInSubThread() throws SwallowException {
+                    TalkActivity.singleton.tvManager.loadNextMessage();
+                }
+            };
+        }
     }
 
     @Override
@@ -72,31 +76,47 @@ public class MyGcmListenerService extends GcmListenerService {
     }
 
     private final void sendNotification(String message) {
-        Intent intent = new Intent(MainActivity.singleton, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(
-                TalkActivity.singleton, REQUEST_CODE_MAIN_ACTIVITY, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        MyUtils.staticInit(getApplicationContext());
+
+        SwallowImpl swallow = null;
+        String serial = MyUtils.sp.getString(MyUtils.SWALLOW_SECURITY_SERIALIZE_CODE, null);
+        //Serialコードがあったなら
+        if (serial != null) {
+            try {
+                //SwallowSecurityを取得してTalkActivityへ
+                SwallowSecurity sec = SwallowSecurity.deserialize(serial);
+                swallow = new SwallowImpl(sec);
+            } catch (SwallowException e) {
+                e.printStackTrace();
+            }
+        }
+        if (swallow == null) return;
 
         Swallow.Message mInfo = null;
         try {
-            mInfo = SCM.scm.swallow.findMessage(null, null, null, null, new Integer[]{Integer.parseInt(message)}, null, null, null, null, null, null, null, null)[0];
+            mInfo = swallow.findMessage(null, null, null, null, new Integer[]{Integer.parseInt(message)}, null, null, null, null, null, null, null, null)[0];
         } catch (SwallowException e) {
             e.printStackTrace();
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
         String notifyTagString = MyUtils.sp.getString(MyUtils.NOTIFY_TAG_KEY, null);
+        int myUserID = MyUtils.sp.getInt(MyUtils.MY_USER_ID_KEY, -1);
         if (notifyTagString != null
-                && mInfo.getUserID() !=
-                TalkActivity.singleton.tvManager.getMyUserInfo().user.getUserID()
- ) {
+                && myUserID != -1
+                && mInfo.getUserID() != myUserID
+                ) {
             String[] tag = notifyTagString.split(",");
             boolean flag = false;
             for (String t : tag) {
-                int i = Integer.parseInt(t);
-                for (int ID : mInfo.getTagID()) {
-                    if (i == ID) {
-                        flag = true;
-                        break;
+                if (t.length() > 0) {
+                    int i = Integer.parseInt(t);
+                    for (int ID : mInfo.getTagID()) {
+                        if (i == ID) {
+                            flag = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -108,16 +128,9 @@ public class MyGcmListenerService extends GcmListenerService {
                     Bitmap userThumb = null;
                     try {
                         UserInfo uInfo = null;
-                        if (TalkActivity.singleton != null) {
-                            uInfo = TalkActivity.singleton.tvManager.findUserById(mInfo.getUserID());
-                            if (uInfo == null) {
-                                SCM.scm.swallow.findUser(null, null, null, null, new Integer[]{mInfo.getUserID()}, null, null, null);
-                            }
-                        } else {
-                            Swallow.User[] uInfos = SCM.scm.swallow.findUser(null, null, null, null, new Integer[]{mInfo.getUserID()}, null, null, null);
-                            if (uInfos.length > 0)
-                                uInfo = new UserInfo(uInfos[0]);
-                        }
+                        Swallow.User[] uInfos = swallow.findUser(null, null, null, null, new Integer[]{mInfo.getUserID()}, null, null, null);
+                        if (uInfos.length > 0)
+                            uInfo = new UserInfo(uInfos[0]);
                         if (uInfo != null) {
                             userName = uInfo.user.getUserName();
                             userThumb = uInfo.profileImage;
@@ -135,10 +148,11 @@ public class MyGcmListenerService extends GcmListenerService {
                     builder.setTicker(getString(R.string.notification_message_not_found_text));
                 }
                 builder.setContentTitle(getString(R.string.app_name));
-                builder.setContentIntent(contentIntent);
                 builder.setSmallIcon(R.drawable.small_ic_launcher);
                 builder.setWhen(System.currentTimeMillis());
                 builder.setAutoCancel(true);
+                builder.setContentIntent(PendingIntent.getActivity(this, 0,
+                        new Intent(this, MainActivity.class), 0));
                 builder.setColor(0xff005C92); //(0x005C92
                 builder.setVibrate(new long[]{1000, 100, 250, 100, 100, 100, 250, 100, 100, 700}); //にっこにっこにー
                 NotificationManager manager = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);

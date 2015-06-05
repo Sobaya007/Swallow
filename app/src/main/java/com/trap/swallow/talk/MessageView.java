@@ -134,8 +134,10 @@ public class MessageView extends LinearLayout{
                         replyView.setOnClickListener(new OnClickListener() {
                             @Override
                             public void onClick(View v) {
-//                                for (int i = 0; i < tvManager.get)
-//                                context.scrollView.smoothScrollTo(0, (int) tvManager.findMessageViewById(postId).getY());
+                                MessageView mv = tvManager.findMessageViewById(postId);
+                                if (mv != null) {
+                                    context.scrollView.smoothScrollTo(0, (int)mv.getY());
+                                }
                             }
                         });
                     }
@@ -160,6 +162,38 @@ public class MessageView extends LinearLayout{
                     userName.setText(sender.user.getUserName());
                     profile.setText(sender.user.getProfile());
                     imageView.setImageBitmap(sender.profileImage);
+                    imageView.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new ServerTask(context, "画像の読み込みに失敗しました") {
+                                @Override
+                                public void doInSubThread() throws SwallowException {
+                                    Swallow.File file = tvManager.findFileById(sender.user.getImage());
+                                    Intent intent = new Intent();
+                                    intent.setType(file.getFileType());
+                                    intent.setAction(Intent.ACTION_VIEW);
+                                    try {
+                                        File f = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), file.getFileName());
+                                        if (f.exists() == false) {
+                                            FileOutputStream fos = new FileOutputStream(f);
+                                            fos.write(MyUtils.getFileByteArray(file.getFileID()));
+                                            fos.flush();
+                                            fos.close();
+                                        }
+                                    } catch (FileNotFoundException e) {
+                                        // TODO 自動生成された catch ブロック
+                                        e.printStackTrace();
+                                    } catch (IOException e) {
+                                        // TODO 自動生成された catch ブロック
+                                        e.printStackTrace();
+                                    }
+                                    String path = "file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + file.getFileName();
+                                    intent.setDataAndType(Uri.parse(path), file.getFileType());
+                                    context.startActivity(intent);
+                                }
+                            };
+                        }
+                    });
                     b.setView(l);
                     b.show();
                 }
@@ -428,14 +462,8 @@ public class MessageView extends LinearLayout{
                             SCM.scm.swallow.createFavorite(MessageView.this.mInfo.getPostID(), 1);
                             MessageView.this.mInfo = SCM.scm.swallow.findMessage(null, null, null, null, new Integer[]{MessageView.this.mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
                         }
-
-                        @Override
-                        protected void onPostExecute(Boolean aBoolean) {
-                            if (aBoolean) {
-                                favNumView.setText(String.valueOf(MessageView.this.mInfo.getFavCount()));
-                            }
-                        }
                     };
+                    favNumView.setText(String.valueOf(MessageView.this.mInfo.getFavCount()));
                 }
             });
         }

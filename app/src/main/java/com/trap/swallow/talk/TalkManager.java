@@ -122,6 +122,11 @@ public class TalkManager {
 		//自分のユーザーIDを取得
 		myUserInfo = new UserInfo(SCM.scm.swallow.modifyUser(null, null, null, null, null, null, null, null, null, null, null));
 
+		//自分のユーザーIDをPreferrenceへ
+		{
+			MyUtils.sp.edit().putInt(MyUtils.MY_USER_ID_KEY, myUserInfo.user.getUserID()).apply();
+		}
+
 		//messageListの読み込み
 		SCM.scm.initMessageList(messageList, getSelectedTagIDList(), context, this);
 
@@ -625,7 +630,7 @@ public class TalkManager {
 
 	public final void startReply(int replyPostId) {
 		this.replyPostId = replyPostId;
-		((EditText)context.findViewById(R.id.input_text)).setText("リプなう");
+		((TextView)context.findViewById(R.id.input_explain_text)).setText("リプなう");
 	}
 
 	public final void endReply() {
