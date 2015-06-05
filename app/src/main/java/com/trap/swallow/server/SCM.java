@@ -71,7 +71,7 @@ public class SCM {
 		Message[] messages = swallow.findMessage(0, INITIAL_LOAD_MESSAGE_NUM, null, null, null, null, tagIDs, null, null, null, null, null, null);
 		SharedPreferences.Editor editor = MyUtils.sp.edit();
 		for (Message m : messages) {
-			messageList.add(new MessageView(context, m, messages, tvManager));
+			messageList.add(new MessageView(context, m, tvManager));
 		}
 		if (messages.length > 0) {
 			latestPostedTime = messages[0].getPosted();
@@ -83,9 +83,9 @@ public class SCM {
 
 	public void loadOlderMessageToList(List<MessageView> messageList, Integer[] tagIDs, TalkActivity context, TalkManager tvManager) throws SwallowException {
 		//時間とタグで検索をかけて、インデックスで絞る
-		Message[] messages = swallow.findMessage(0, ADDITIONAL_LOAD_MESSAGE_NUM, null, oldestPostedTime-1, null, null, tagIDs, null, null, null, null, null, null);
+		Message[] messages = swallow.findMessage(0, ADDITIONAL_LOAD_MESSAGE_NUM, null, oldestPostedTime - 1, null, null, tagIDs, null, null, null, null, null, null);
 		for (Message m : messages) {
-			messageList.add(new MessageView(context, m, messages, tvManager));
+			messageList.add(new MessageView(context, m, tvManager));
 		}
 		if (messages.length != 0)
 			oldestPostedTime = messages[messages.length-1].getPosted();
@@ -95,10 +95,20 @@ public class SCM {
 		//時間とタグで検索をかけて、インデックスで絞る
 		Message[] messages = swallow.findMessage(0, ADDITIONAL_LOAD_MESSAGE_NUM, latestPostedTime+1, null, null, null, tagIDs, null, null, null, null, null, null);
 		for (Message m : messages) {
-			messageList.add(new MessageView(context, m, messages, tvManager));
+			messageList.add(new MessageView(context, m, tvManager));
 		}
 		if (messages.length != 0)
 			latestPostedTime = messages[0].getPosted();
+	}
+
+	public void loadOlderMessageToListUntil(List<MessageView> messageList, Integer[] tagIDs, TalkActivity context, TalkManager tvManager, long until) throws SwallowException {
+		//時間とタグで検索をかけて、インデックスで絞る
+		Message[] messages = swallow.findMessage(0, Integer.MAX_VALUE/2, until+1, oldestPostedTime-1, null, null, tagIDs, null, null, null, null, null, null);
+		for (Message m : messages) {
+			messageList.add(new MessageView(context, m, tvManager));
+		}
+		if (messages.length != 0)
+			oldestPostedTime = messages[messages.length-1].getPosted();
 	}
 
 	public final void loadTagList(ArrayList<TagInfo> visibleTagList, ArrayList<TagInfo> invisibleTagList) throws SwallowException {

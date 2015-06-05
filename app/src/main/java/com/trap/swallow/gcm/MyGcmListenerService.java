@@ -125,23 +125,19 @@ public class MyGcmListenerService extends GcmListenerService {
                         getApplicationContext());
                 if (mInfo != null) {
                     String userName = null;
-                    Bitmap userThumb = null;
                     try {
-                        UserInfo uInfo = null;
+                        Swallow.User user = null;
                         Swallow.User[] uInfos = swallow.findUser(null, null, null, null, new Integer[]{mInfo.getUserID()}, null, null, null);
                         if (uInfos.length > 0)
-                            uInfo = new UserInfo(uInfos[0]);
-                        if (uInfo != null) {
-                            userName = uInfo.user.getUserName();
-                            userThumb = uInfo.profileImage;
+                            user = uInfos[0];
+                        if (user != null) {
+                            userName = user.getUserName();
                         } else {
                             userName = "unknown";
-                            userThumb = null;
                         }
                     } catch (SwallowException e) {
                         e.printStackTrace();
                     }
-                    builder.setLargeIcon(userThumb);
                     builder.setTicker(userName + ":" + mInfo.getMessage());
                     builder.setContentText(userName + ":" + mInfo.getMessage());
                 } else {

@@ -72,7 +72,7 @@ public class MessageView extends LinearLayout{
     private AlertDialog enqueteDialog;
     private AlertDialog answerDialog;
 
-    public MessageView(final TalkActivity context, final Message mInfo, final Message[] loadedMessageList, final TalkManager tvManager) {
+    public MessageView(final TalkActivity context, final Message mInfo, final TalkManager tvManager) {
         super(context);
 
         this.mInfo = mInfo;
@@ -93,7 +93,7 @@ public class MessageView extends LinearLayout{
             TextView messageView = (TextView)v.findViewById(R.id.message_text);
             messageView.setText(mInfo.getMessage());
             if (isYojo)
-            messageView.setTypeface(MyUtils.yojoFont);
+                messageView.setTypeface(MyUtils.yojoFont);
         }
 
         //リプ
@@ -105,18 +105,10 @@ public class MessageView extends LinearLayout{
                 for (final int postId : reply) {
                     StringBuilder sb = new StringBuilder();
                     Message message = null;
-                    {
-                        if (loadedMessageList != null) {
-                            for (Message loadedMessage : loadedMessageList) {
-                                if (loadedMessage.getPostID() == postId)
-                                    message = loadedMessage;
-                            }
-                        }
-                        if (message == null) {
-                            MessageView mv = tvManager.findMessageViewById(postId);
-                            if (mv != null)
-                            message = mv.mInfo;
-                        }
+                    try {
+                        message = SCM.scm.swallow.findMessage(null, null, null, null, new Integer[]{postId}, null, null, null, null, null, null, null, null)[0];
+                    } catch (SwallowException e) {
+                        e.printStackTrace();
                     }
                     if (message != null) {
                         sb.append(">>");
@@ -131,13 +123,32 @@ public class MessageView extends LinearLayout{
                         replyView.setText(sb.toString());
                         replyView.setTextColor(Color.rgb(144, 144, 144));
                         replyLayout.addView(replyView);
+                        final long until = message.getPosted();
                         replyView.setOnClickListener(new OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                MessageView mv = tvManager.findMessageViewById(postId);
-                                if (mv != null) {
-                                    context.scrollView.smoothScrollTo(0, (int)mv.getY());
-                                }
+                                AsyncTask<Void, Void, ArrayList<MessageView>> task = new AsyncTask<Void, Void, ArrayList<MessageView>>() {
+                                    @Override
+                                    protected ArrayList<MessageView> doInBackground(Void... params) {
+                                        return tvManager.loadPreviousMessageUntil(until);
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(ArrayList<MessageView> messageViews) {
+                                        if (messageViews != null) {
+                                            for (MessageView mv : messageViews)
+                                                tvManager.addMessageViewToPrev(mv);
+
+                                            MessageView mv = tvManager.findMessageViewById(postId);
+                                            if (mv != null) {
+                                                context.scrollView.smoothScrollTo(0, (int)mv.getY());
+                                            }
+                                        } else {
+                                            MyUtils.showShortToast(context, "読み込みに失敗しました");
+                                        }
+                                    }
+                                };
+                                task.execute((Void)null);
                             }
                         });
                     }
@@ -145,7 +156,7 @@ public class MessageView extends LinearLayout{
             }
         }
 
-       final  UserInfo sender = tvManager.findUserById(mInfo.getUserID());
+        final  UserInfo sender = tvManager.findUserById(mInfo.getUserID());
         //アイコン
         {
             ImageView iconView = (ImageView)v.findViewById(R.id.icon_image);
@@ -692,7 +703,7 @@ public class MessageView extends LinearLayout{
                 @Override
                 public void onClick(View v) {
                     if (v == EnqueteView.this)
-                    dialog.show();
+                        dialog.show();
                 }
             });
         }

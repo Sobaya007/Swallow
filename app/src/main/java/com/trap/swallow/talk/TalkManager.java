@@ -245,6 +245,57 @@ public class TalkManager {
 		return newMessageList;
 	}
 
+	public final ArrayList<MessageView> loadPreviousMessageUntil(long until) {
+
+		//userInfoListの読み込み
+		try {
+			SCM.scm.loadUserInfo(userInfoList);
+		} catch (SwallowException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		//選択されているタグを一時的に保存
+		ArrayList<Integer> selectedTagIDList = new ArrayList<>();
+		for (int i = 0; i < getVisibleTagNum(); i++) {
+			TagInfo t = findVisibleTagByIndex(i);
+			if (t.isSelected)
+				selectedTagIDList.add(t.tagID);
+		}
+
+		//tagListの読み込み
+		try {
+			SCM.scm.loadTagList(visibleTagList, invisibleTagList);
+		} catch (SwallowException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		//現在のタグ選択状況を復元
+		for (int i = 0; i < selectedTagIDList.size(); i++) {
+			TagInfo t = findVisibleTagById(selectedTagIDList.get(i));
+			if (t != null)
+				t.isSelected = true;
+		}
+
+		ArrayList<MessageView> newMessageList = new ArrayList<>();
+		//newMessageListの読み込み
+		try {
+			SCM.scm.loadOlderMessageToListUntil(newMessageList, getSelectedTagIDList(), context, this, until);
+		} catch (SwallowException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		for (int i = 0; i < newMessageList.size(); i++) {
+			MessageView mv = newMessageList.get(i);
+			Animation anim = createAnimationOnReflesh(i);
+			mv.anim = anim;
+			messageList.add(mv);
+		}
+		return newMessageList;
+	}
+
 	public final ArrayList<MessageView> refreshOnTagSelectChanged() throws SwallowException, IOException, ClassNotFoundException {
 
 		//userInfoListの読み込み
@@ -328,15 +379,10 @@ public class TalkManager {
 		} else {
 			mInfo = SCM.scm.sendMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, getSelectedTagIDList(), null, enqueteList.toArray(new String[0]));
 		}
-		if (enqueteList.size() > 0) {
-			for (int i = 0; i < 10; i++) {
-				SCM.scm.swallow.createAnswer(mInfo.getPostID(), (int)(Math.random() * enqueteList.size()));
-			}
-		}
 		enqueteList.clear();
 		this.postFileData.clear();
 
-		MessageView mv = new MessageView(context, mInfo, null, TalkManager.this);
+		MessageView mv = new MessageView(context, mInfo, TalkManager.this);
 		Animation anim = createAnimationOnReflesh(5);
 		mv.anim = anim;
 		messageList.add(mv);

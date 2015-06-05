@@ -1310,7 +1310,7 @@ public class TalkActivity extends AppCompatActivity {
 				//adapterを生成・設定。
 				for (int i = 0; i < members.length; i++)
 					members[i] = tvManager.findVisibleTagByIndex(i).tagName;
-				ArrayAdapter<String> tagList = new ArrayAdapter<String>(TalkActivity.this,
+				ArrayAdapter<String> tagList = new ArrayAdapter<>(TalkActivity.this,
 						android.R.layout.simple_list_item_multiple_choice, members);
 				tagSelectList.setAdapter(tagList);
 			}
