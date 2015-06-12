@@ -7,28 +7,23 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.ActionMode;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -43,22 +38,17 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -66,24 +56,22 @@ import android.widget.ViewFlipper;
 import com.trap.swallow.gcm.RegistrationIntentService;
 import com.trap.swallow.info.FileInfo;
 import com.trap.swallow.info.TagInfoManager;
-import com.trap.swallow.info.UserInfo;
 import com.trap.swallow.info.UserInfoManager;
+import com.trap.swallow.login.LogInActivity;
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.ServerTask;
 import com.trap.swallow.server.Swallow;
 import com.trap.swallow.server.SwallowException;
+import com.trap.swallow.server.SwallowSecurity;
 import com.trap.swallow.swallow.R;
 
-import org.w3c.dom.Text;
-
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class TalkActivity extends AppCompatActivity {
+public class TalkActivity extends AppCompatActivity implements SensorEventListener {
 
 	public static TalkActivity singleton;
 
@@ -95,9 +83,9 @@ public class TalkActivity extends AppCompatActivity {
 	private static final int DOWN_BUTTON_ID = 2;
 	private static final int SETTING_BUTTON_ID = 3;
 	private static final int LOGOUT_BUTTON_ID = 4;
+	private static final int PASTE_BUTTON_ID = 5;
 
-	public TalkManager tvManager;
-	public ScrollView scrollView;
+	public ListView scrollView;
 
 	private int backCount = -1;
 
@@ -125,6 +113,7 @@ public class TalkActivity extends AppCompatActivity {
 	private View inputView;
 	private View settingView;
 	private View settingTagView;
+	private View mainView;
 
 	private BackgroundView bgView;
 	private FileInfo userImageFile; //設定変更時の一時保存用
@@ -151,8 +140,9 @@ public class TalkActivity extends AppCompatActivity {
 
 		initBackgroundView(mainLayout);
 		initFlipper(mainLayout);
-		initGravitySensor();
-		scrollView = (ScrollView)findViewById(R.id.talk_scroll_view);
+		this.mainView = mainLayout;
+		initSensor();
+		scrollView = (ListView)findViewById(R.id.talk_scroll_view);
 		initTalkManager();
 		initAnimations();
 		initInputText();
@@ -170,6 +160,7 @@ public class TalkActivity extends AppCompatActivity {
 		initReceivedCheckBox();
 		initInsertCodeButton();
 		initSetting();
+		initRefreshWidget();
 
 		//別スレッドを起動
 		Timer t = new Timer();
@@ -185,24 +176,17 @@ public class TalkActivity extends AppCompatActivity {
 
 				break;
 			case REFLESH_BUTTON_ID:
-				AsyncTask<Void, Void, ArrayList<MessageView>> task = new AsyncTask<Void, Void, ArrayList<MessageView>>() {
+				new ServerTask(this, "更新失敗") {
 					@Override
-					protected ArrayList<MessageView> doInBackground(Void... params) {
-						return tvManager.loadPreviousMessage();
+					public void doInSubThread() throws SwallowException {
+						TalkManager.refreshOnUserInfoChanged_1();
 					}
 
 					@Override
-					protected void onPostExecute(ArrayList<MessageView> messageViews) {
-						if (messageViews != null) {
-							for (MessageView mv : messageViews)
-								tvManager.addMessageViewToPrev(mv);
-							MyUtils.showShortToast(TalkActivity.this, "読み込み完了");
-						} else {
-							MyUtils.showShortToast(TalkActivity.this, "更新に失敗しました");
-						}
+					protected void onPostExecute(Boolean aBoolean) {
+						TalkManager.refreshOnUserInfoChanged_2();
 					}
 				};
-				task.execute((Void) null);
 				break;
 			case UP_BUTTON_ID:
 				MyUtils.scrollUp();
@@ -214,6 +198,7 @@ public class TalkActivity extends AppCompatActivity {
 				shiftToSetting();
 				break;
 			case LOGOUT_BUTTON_ID:
+				logout();
 				break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -270,13 +255,13 @@ public class TalkActivity extends AppCompatActivity {
 				//トークにもどる
 				shiftToTalk();
 
-				if (tvManager.isReplyMode()) {
+				if (TalkManager.isReplyMode()) {
 					//リプ中なら
-					tvManager.endReply();
+					TalkManager.endReply();
 				}
-				if (tvManager.isEditMode()) {
+				if (TalkManager.isEditMode()) {
 					//編集中なら
-					tvManager.endEdit();
+					TalkManager.endEdit();
 				}
 
 			} else if (vf.getCurrentView() == settingView) {
@@ -311,7 +296,7 @@ public class TalkActivity extends AppCompatActivity {
 						Uri uri = data.getData();
 
 						FileInfo file = new FileInfo(getContentResolver(), getResources(), uri);
-						tvManager.addFileToPost(file);
+						TalkManager.addFileToPost(file);
 					}
 					catch (Exception e) {
 						// TODO 自動生成された catch ブロック
@@ -403,7 +388,7 @@ public class TalkActivity extends AppCompatActivity {
 		flipper.addView(settingTagView = LayoutInflater.from(this).inflate(R.layout.view_setting_tag, null));
 	}
 
-	private final void initGravitySensor() {
+	private final void initSensor() {
 		//bgViewがあったら、重力センサーを登録
 		if (bgView != null) {
 			SensorManager sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -412,18 +397,22 @@ public class TalkActivity extends AppCompatActivity {
 				Sensor s = sensors.get(0);
 				sManager.registerListener(bgView, s, SensorManager.SENSOR_DELAY_UI);
 			}
+			sensors = sManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+			if (sensors.size() > 0) {
+				Sensor s = sensors.get(0);
+				sManager.registerListener(this, s, SensorManager.SENSOR_DELAY_UI);
+			}
 		}
 	}
 
 	private final void initTalkManager() {
-		LinearLayout mainLayout = (LinearLayout)findViewById(R.id.left_draw);
-		tvManager = new TalkManager(this, mainLayout);
+		TalkManager.start(this);
 		new ServerTask(this, "初期化に失敗しました") {
 			@Override
 			public void doInSubThread() throws SwallowException {
 				//tvManagerを初期化
 				try {
-					tvManager.init();
+					TalkManager.init();
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
@@ -433,8 +422,8 @@ public class TalkActivity extends AppCompatActivity {
 
 			@Override
 			protected void onPostExecute(Boolean aBoolean) {
-				//tvManager.initの終わったあとにされる処理
-				tvManager.pushMessageList(); //このスレッドでやらないとまずい処理
+				//TalkManager.initの終わったあとにされる処理
+				TalkManager.pushMessageList(); //このスレッドでやらないとまずい処理
 				//タグ一覧表示ビューの設定
 				initTagSelectList();
 				initUserSelectList();
@@ -483,7 +472,7 @@ public class TalkActivity extends AppCompatActivity {
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				tvManager.startPost();
+				TalkManager.startPost();
 				shiftToInputForm();
 			}
 		});
@@ -496,10 +485,10 @@ public class TalkActivity extends AppCompatActivity {
 			public void onClick(View v) {
 				//送信ボタンをタップしたときの処理
 				EditText input = (EditText) findViewById(R.id.input_text_dummy);
-				tvManager.startPost();
+				TalkManager.startPost();
 				String text = input.getText().toString();
 				if (submitMessage(text, v)) {
-					tvManager.endPost();
+					TalkManager.endPost();
 				}
 			}
 		});
@@ -525,7 +514,7 @@ public class TalkActivity extends AppCompatActivity {
 				//送信ボタンをタップしたときの処理
 				String text = input.getText().toString();
 				if (submitMessage(text, v)) {
-					tvManager.endPost();
+					TalkManager.endPost();
 					//view_talkに戻る
 					((ViewFlipper) findViewById(R.id.flipper)).showPrevious();
 				}
@@ -542,7 +531,6 @@ public class TalkActivity extends AppCompatActivity {
 				showFileUploadDialog();
 			}
 		});
-		uploadLayout.addView(tvManager.getFileClipView());
 	}
 
 	private final void initTagSelectList() {
@@ -615,18 +603,35 @@ public class TalkActivity extends AppCompatActivity {
 	}
 
 	private final void initUserSelectList() {
-		final ListView userSelectList = (ListView)findViewById(R.id.drawer_user_select_list);
-		userSelectList.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
-									long arg3) {
-				String userName = (String) userSelectList.getItemAtPosition(position);
-				UserInfo userInfo = UserInfoManager.findUserByName(userName);
-				((DrawerLayout)findViewById(R.id.drawer_layout)).closeDrawers();
-//				ProgressDialog progressDialog = MyUtils.createPorgressDialog();
-
-			}
-		});
+//		final ListView userSelectList = (ListView)findViewById(R.id.drawer_user_select_list);
+//		userSelectList.setOnItemClickListener(new OnItemClickListener() {
+//			@Override
+//			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+//									long arg3) {
+//				String userName = (String) userSelectList.getItemAtPosition(position);
+//				final UserInfo userInfo = UserInfoManager.findUserByName(userName);
+//				((DrawerLayout) findViewById(R.id.drawer_layout)).closeDrawers();
+////				ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+//				final ArrayList<MessageView> messageViewArrayList = new ArrayList<MessageView>();
+//				new ServerTask(TalkActivity.this, "読み込みに失敗しました") {
+//					@Override
+//					public void doInSubThread() throws SwallowException {
+//						SCM.loadUserMessageToList(messageViewArrayList, userInfo.user.getUserID());
+//					}
+//
+//					@Override
+//					protected void onPostExecute(Boolean aBoolean) {
+//						if (aBoolean) {
+//							TalkManager.removeAllMessageViews();
+//							for (MessageView mv : messageViewArrayList) {
+//								TalkManager.addMessageViewToPrev(mv);
+//								mv.initOnMainThread();
+//							}
+//						}
+//					}
+//				}
+//			}
+//		});
 	}
 
 	private final void initUserSearchBox() {
@@ -719,7 +724,7 @@ public class TalkActivity extends AppCompatActivity {
 						protected ArrayList<MessageView> doInBackground(Void... params) {
 							//MessageViewのリストを更新
 							try {
-								return tvManager.refreshOnTagSelectChanged();
+								return TalkManager.refreshOnTagSelectChanged();
 							} catch (SwallowException e) {
 								e.printStackTrace();
 							}
@@ -730,10 +735,9 @@ public class TalkActivity extends AppCompatActivity {
 						protected void onPostExecute(ArrayList<MessageView> messageViews) {
 							if (messageViews != null) {
 								//更新に成功していたら、MessageViewを突っ込む
-								LinearLayout layout = (LinearLayout)findViewById(R.id.left_draw);
-								layout.removeAllViews();
+								TalkManager.removeAllMessageViews();
 								for (MessageView mv : messageViews)
-									tvManager.addMessageViewToPrev(mv);
+									TalkManager.addMessageViewToPrev(mv);
 
 							} else {
 								MyUtils.showShortToast(TalkActivity.this, "更新に失敗しました");
@@ -906,7 +910,7 @@ public class TalkActivity extends AppCompatActivity {
 					@Override
 					public void onClick(View v) {
 						enqueteDialog.dismiss();
-						tvManager.clearEnquete();
+						TalkManager.clearEnquete();
 					}
 				});
 			}
@@ -929,7 +933,7 @@ public class TalkActivity extends AppCompatActivity {
 				textView.setText(textView.getText() + "``````");
 //				final AlertDialog.Builder codeDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
 //				String[] items;
-//				if (tvManager.hasCode())
+//				if (TalkManager.hasCode())
 //					items = new String[]{"コードを挿入", "コードを削除"};
 //				else
 //					items = new String[]{"コードを挿入"};
@@ -951,7 +955,7 @@ public class TalkActivity extends AppCompatActivity {
 //									@Override
 //									public void onClick(DialogInterface dialog, int which) {
 //										//OK押されたら
-//										tvManager.addCode(codeInput.getText().toString());
+//										TalkManager.addCode(codeInput.getText().toString());
 //									}
 //								});
 //								codeInputDialogBuilder.setNegativeButton(R.string.cancel_text, null);
@@ -959,7 +963,7 @@ public class TalkActivity extends AppCompatActivity {
 //								break;
 //							case 1: //コード削除
 //								AlertDialog.Builder codeDeleteDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
-//								String[] items = new String[tvManager.getCodeNum()];
+//								String[] items = new String[TalkManager.getCodeNum()];
 //								for (int i = 0; i < items.length; i++)
 //									items[i] = Integer.toString(i);
 //								codeDeleteDialogBuilder.setItems(items, new DialogInterface.OnClickListener() {
@@ -970,7 +974,7 @@ public class TalkActivity extends AppCompatActivity {
 //										confirmDialogBuilder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
 //											@Override
 //											public void onClick(DialogInterface dialog, int which) {
-//												tvManager.removeCode(which);
+//												TalkManager.removeCode(which);
 //											}
 //										});
 //										confirmDialogBuilder.setNegativeButton(R.string.cancel_text, null);
@@ -1033,13 +1037,13 @@ public class TalkActivity extends AppCompatActivity {
 
 					@Override
 					protected String doInBackground(Void[] params) {
-						String userName = ((TextView)findViewById(R.id.setting_name)).getText().toString();
-						String profile = ((TextView)findViewById(R.id.setting_profile)).getText().toString();
-						String twitterText = ((TextView)findViewById(R.id.setting_twitter)).getText().toString();
-						String mailText1 = ((TextView)findViewById(R.id.setting_mail1)).getText().toString();
-						String mailText2 = ((TextView)findViewById(R.id.setting_mail2)).getText().toString();
-						String password = ((TextView)findViewById(R.id.setting_password)).getText().toString();
-						String passsword_again = ((TextView)findViewById(R.id.setting_password_again)).getText().toString();
+						String userName = ((TextView) findViewById(R.id.setting_name)).getText().toString();
+						String profile = ((TextView) findViewById(R.id.setting_profile)).getText().toString();
+						String twitterText = ((TextView) findViewById(R.id.setting_twitter)).getText().toString();
+						String mailText1 = ((TextView) findViewById(R.id.setting_mail1)).getText().toString();
+						String mailText2 = ((TextView) findViewById(R.id.setting_mail2)).getText().toString();
+						String password = ((TextView) findViewById(R.id.setting_password)).getText().toString();
+						String passsword_again = ((TextView) findViewById(R.id.setting_password_again)).getText().toString();
 						if (userName != null && userName.length() == 0)
 							userName = null;
 						if (profile != null && profile.length() == 0)
@@ -1066,14 +1070,14 @@ public class TalkActivity extends AppCompatActivity {
 							try {
 								imageID = userImageFile.send().getFileID();
 							} catch (SwallowException e) {
-								if (((SwallowException)e.getCause()).getServerMessage().equals("SQLSTATE[08S01]: Communication link failure: 1153 Got a packet bigger than 'max_allowed_packet' bytes")) {
+								if (((SwallowException) e.getCause()).getServerMessage().equals("SQLSTATE[08S01]: Communication link failure: 1153 Got a packet bigger than 'max_allowed_packet' bytes")) {
 									//画像サイズでかすぎぃ！
 								}
 								e.printStackTrace();
 							}
 							userImageFile = null;
 						}
-						Swallow.UserDetail user = (Swallow.UserDetail)UserInfoManager.getMyUserInfo().user;
+						Swallow.UserDetail user = (Swallow.UserDetail) UserInfoManager.getMyUserInfo().user;
 						if ((userName != null && userName.equals(user.getUserName()) == false)
 								|| (profile != null && profile.equals(user.getProfile()) == false)
 								|| (twitterText != null && twitterText.equals(user.getTwitter())) == false
@@ -1086,7 +1090,7 @@ public class TalkActivity extends AppCompatActivity {
 								SCM.swallow.modifyUser(
 										userName, profile, imageID, password, mailText1 + "@" + mailText2, null, twitterText, null, null,
 										null, null);
-								tvManager.refreshOnUserInfoChanged_1();
+								TalkManager.refreshOnUserInfoChanged_1();
 							} catch (SwallowException e) {
 								e.printStackTrace();
 								return "サーバーとの通信に失敗しました";
@@ -1094,10 +1098,10 @@ public class TalkActivity extends AppCompatActivity {
 						}
 						//幼女設定をPreferenceへ
 						boolean y = ((CheckBox) findViewById(R.id.setting_yojo)).isChecked();
-						MyUtils.sp.edit().putBoolean(MyUtils.YOJO_CHECK_KEY,y
+						MyUtils.sp.edit().putBoolean(MyUtils.YOJO_CHECK_KEY, y
 						).apply();
 						//背景設定をPreferenceへ
-						boolean bg = ((CheckBox)findViewById(R.id.setting_background)).isChecked();
+						boolean bg = ((CheckBox) findViewById(R.id.setting_background)).isChecked();
 						MyUtils.sp.edit().putBoolean(MyUtils.BACKGROUND_ENABLE_KEY, bg).apply();
 						bgView.enable = bg;
 						//NotifyをPreferenceへ
@@ -1115,56 +1119,61 @@ public class TalkActivity extends AppCompatActivity {
 					@Override
 					protected void onPostExecute(String str) {
 						if (str == null) {
-							tvManager.refreshOnUserInfoChanged_2();
+							TalkManager.refreshOnUserInfoChanged_2();
 						} else {
 							MyUtils.showShortToast(TalkActivity.this, str);
 						}
 					}
 				};
-				task.execute((Void)null);
+				task.execute((Void) null);
 				shiftToTalk();
 			}
 		});
 	}
 
-	private final boolean submitMessage(final String text, final View v) {
-		if (text.length() > 0 || tvManager.hasFile() || tvManager.hasEnquete()) {
-			//投稿
-			AsyncTask<Void, Void, MessageView> task = new AsyncTask<Void, Void, MessageView>() {
-				@Override
-				protected MessageView doInBackground(Void... params) {
-					try {
-						return tvManager.submit(text);
-					} catch (SwallowException e) {
-						e.printStackTrace();
+	private final void initRefreshWidget() {
+		SwipeRefreshLayout mSwipeRefreshWidget = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_widget);
+		mSwipeRefreshWidget.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				AsyncTask<Void, Void, ArrayList<MessageView>> task = new AsyncTask<Void, Void, ArrayList<MessageView>>() {
+					@Override
+					protected ArrayList<MessageView> doInBackground(Void... params) {
+						return TalkManager.loadPreviousMessage();
 					}
-					return null;
+
+					@Override
+					protected void onPostExecute(ArrayList<MessageView> messageViews) {
+						if (messageViews != null) {
+							for (MessageView mv : messageViews)
+								TalkManager.addMessageViewToPrev(mv);
+							((SwipeRefreshLayout) TalkActivity.singleton.findViewById(R.id.swipe_refresh_widget)).setRefreshing(false);
+						}
+					}
+				};
+				task.execute((Void) null);
+			}
+		});
+	}
+
+	private final boolean submitMessage(final String text, final View v) {
+		if (canSend(text)) {
+			//投稿
+			new ServerTask(this, "送信に失敗しました") {
+				@Override
+				public void doInSubThread() throws SwallowException {
+					TalkManager.submit(text);
 				}
 
 				@Override
-				protected void onPostExecute(MessageView messageView) {
-					if (messageView != null) {
-						if (tvManager.isEditMode()) {
-							//編集中なら
-							tvManager.changeMessageView(messageView);
-							tvManager.endEdit();
-						} else {
-							//普通の投稿なら
-							tvManager.addMessageViewToNext(messageView);
-							//スクロール
-//							scrollView.fullScroll(ScrollView.FOCUS_DOWN);
-							MyUtils.scrollDown();
-
-							tvManager.endPost();
-						}
-						//キーボードを隠す
+				protected void onPostExecute(Boolean aBoolean) {
+					if (aBoolean) {
+						MyUtils.scrollDown();
+						TalkManager.endPost();
 						hideKeyboard(v);
 					}
-					else
-						MyUtils.showShortToast(TalkActivity.this, "メッセージの送信に失敗しました");
 				}
 			};
-			task.execute((Void) null);
 			return true;
 		}
 		return false;
@@ -1188,7 +1197,7 @@ public class TalkActivity extends AppCompatActivity {
 
 	private final void showEnqueteDialog() {
 		//アンケート選択肢を追加
-		enqueteDialogBuilder.setItems(tvManager.getEnqueteArray(), null);
+		enqueteDialogBuilder.setItems(TalkManager.getEnqueteArray(), null);
 		//ダイアログを作成
 		enqueteDialog = enqueteDialogBuilder.create();
 		enqueteDialog.setOnShowListener(enqueteDialogShowListener);
@@ -1198,7 +1207,7 @@ public class TalkActivity extends AppCompatActivity {
 	private final void showFileUploadDialog() {
 		final AlertDialog.Builder b = new AlertDialog.Builder(TalkActivity.this);
 		final String[] item;
-		if (tvManager.hasFile()) {
+		if (TalkManager.hasFile()) {
 			item = new String[]{"ギャラリーから選択", "ファイルを選択", "ファイルを削除"};
 		} else {
 			item = new String[]{"ギャラリーから選択", "ファイルを選択"};
@@ -1220,9 +1229,9 @@ public class TalkActivity extends AppCompatActivity {
 						break;
 					case 2: //ファイルを削除
 						AlertDialog.Builder b = new AlertDialog.Builder(TalkActivity.this);
-						String[] items = new String[tvManager.getFileNum()];
+						String[] items = new String[TalkManager.getFileNum()];
 						for (int i = 0; i < items.length; i++)
-							items[i] = tvManager.getFile(i).fileName;
+							items[i] = TalkManager.getFile(i).fileName;
 						b.setItems(items, new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, final int selected) {
@@ -1231,7 +1240,7 @@ public class TalkActivity extends AppCompatActivity {
 								confirmBuilder.setPositiveButton("hai", new DialogInterface.OnClickListener() {
 									@Override
 									public void onClick(DialogInterface dialog, int which) {
-										tvManager.removeFile(selected);
+										TalkManager.removeFile(selected);
 									}
 								});
 								confirmBuilder.setNegativeButton("iie", null);
@@ -1349,36 +1358,11 @@ public class TalkActivity extends AppCompatActivity {
 	}
 
 	private final void editMessage(int postId) {
-		tvManager.startEdit(postId);
+		TalkManager.startEdit(postId);
 	}
 
-	private final void deleteMessage(final int postId) {
-		final LinearLayout layout = (LinearLayout)findViewById(R.id.left_draw);
-		//削除するMessageViewを検索
-		for (int i = 0; i < layout.getChildCount(); i++) {
-			View child = layout.getChildAt(i);
-			if (child instanceof MessageView) {
-				final View child2 = layout.getChildAt(i+1);
-				final MessageView mv = (MessageView)child;
-				if (mv.mInfo.getPostID() == postId) {
-					new ServerTask(this, "削除失敗") {
-						@Override
-						public void doInSubThread() throws SwallowException {
-							SCM.deleteMessage(postId);
-						}
-
-						@Override
-						protected void onPostExecute(Boolean aBoolean) {
-							if (aBoolean) {
-								layout.removeView(mv);
-								layout.removeView(child2);
-							}
-						}
-					};
-					break;
-				}
-			}
-		}
+	private final void deleteMessage(final int postID) {
+		TalkManager.deleteMessage(postID);
 	}
 
 	private final void showKeyboard(final EditText edit) {
@@ -1398,6 +1382,21 @@ public class TalkActivity extends AppCompatActivity {
 		((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE))
 				.hideSoftInputFromWindow(v.getWindowToken(),
 						InputMethodManager.HIDE_NOT_ALWAYS);
+	}
+
+	private final void logout() {
+		String serial = MyUtils.sp.getString(MyUtils.SWALLOW_SECURITY_SERIALIZE_CODE, null);
+		try {
+			SwallowSecurity security = SwallowSecurity.deserialize(serial);
+			security.logout();
+		} catch (SwallowException e) {
+			e.printStackTrace();
+		}
+		MyUtils.sp.edit().putString(MyUtils.SWALLOW_SECURITY_SERIALIZE_CODE, null).apply();
+		Intent intent = new Intent(getApplicationContext(), LogInActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
+		finish();
 	}
 
 	private final void updateTagSelectList() {
@@ -1429,13 +1428,16 @@ public class TalkActivity extends AppCompatActivity {
 			{
 				//adapterを生成・設定。
 				for (int i = 0; i < members.length; i++)
-					members[i] = UserInfoManager.findUserByIndex(i).user.getUserName();
+					members[members.length - i - 1] = UserInfoManager.findUserByIndex(i).user.getUserName();
 				ArrayAdapter<String> tagList = new ArrayAdapter<>(TalkActivity.this,
 						android.R.layout.simple_list_item_1, members);
 				userSelectList.setAdapter(tagList);
 			}
 		}
+	}
 
+	private final boolean canSend(String text) {
+		return text.length() > 0 || TalkManager.hasFile() || TalkManager.hasEnquete();
 	}
 
 	private final void onTagSelectButtonPressed() {
@@ -1503,7 +1505,7 @@ public class TalkActivity extends AppCompatActivity {
 		String enquete = enqueteAddInput.getText().toString().trim();
 		//何か入力されていたら
 		if (enquete != null && enquete.length() != 0) {
-			tvManager.addEnquete(enquete);
+			TalkManager.addEnquete(enquete);
 
 			//アンケート選択ダイアログを再表示
 			enqueteDialog.dismiss();
@@ -1511,12 +1513,52 @@ public class TalkActivity extends AppCompatActivity {
 		}
 	}
 
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+			float ax = event.values[0];
+			float ay = event.values[1];
+			float az = event.values[2];
+			float a = (float)Math.sqrt(ax*ax + ay*ay + az*az);
+			if (a > 30) {
+				ViewFlipper flipper = (ViewFlipper)findViewById(R.id.flipper);
+				String text;
+				TalkManager.startPost();
+				if (flipper.getCurrentView() == inputView) {
+					text = input.getText().toString();
+					if (canSend(text)) {
+						text += "\nこの投稿の加速度は" + a + "m/(s^2)でした";
+						if (submitMessage(text, input)) {
+							TalkManager.endPost();
+							//view_talkに戻る
+							((ViewFlipper) findViewById(R.id.flipper)).showPrevious();
+						}
+					}
+				} else if (flipper.getCurrentView() == mainView) {
+					EditText input = (EditText) findViewById(R.id.input_text_dummy);
+					text = input.getText().toString();
+					if (canSend(text)) {
+						text += "\nこの投稿の加速度は" + a + "m/(s^2)でした";
+						if (submitMessage(text, input)) {
+							TalkManager.endPost();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+	}
+
 	private final class Task extends TimerTask {
 
 		@Override
 		public void run() {
 			backCount--;
-			TalkActivity.this.tvManager.run();
+			TalkManager.run();
 		}
 
 	}

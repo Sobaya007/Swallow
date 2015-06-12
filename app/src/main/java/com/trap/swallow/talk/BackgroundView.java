@@ -557,7 +557,6 @@ public class BackgroundView extends GLSurfaceView implements Renderer, SensorEve
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		// TODO Auto-generated method stub
 		if(event.sensor.getType() == Sensor.TYPE_GRAVITY) {
 			float gx = event.values[0];
 			float gy = event.values[1];

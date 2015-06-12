@@ -2,18 +2,26 @@ package com.trap.swallow.talk;
 
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Base64;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +31,7 @@ import com.trap.swallow.info.TagInfoManager;
 import com.trap.swallow.info.UserInfo;
 import com.trap.swallow.info.UserInfoManager;
 import com.trap.swallow.server.SCM;
+import com.trap.swallow.server.ServerTask;
 import com.trap.swallow.server.Swallow;
 import com.trap.swallow.server.Swallow.File;
 import com.trap.swallow.server.Swallow.Message;
@@ -42,25 +51,24 @@ import java.util.List;
  * トークに関する処理のみをするクラス
  */
 public class TalkManager {
+	
+	private static FileClipView clipView;
+	private static final List<MessageView> messageList = Collections.synchronizedList(new ArrayList<MessageView>());
+	private static TalkActivity context;
+	private static final MessageViewAdapter parent = new MessageViewAdapter();
+	private static int editingPostId = -1; //編集中の投稿のID
+	private static int replyPostId = -1; //リプライ用の一時保存変数
+	private static ArrayList<FileInfo> postFileData = new ArrayList<>();
+	private static ArrayList<String> enqueteList = new ArrayList<>(); //現在の投稿のアンケート
+	private static ArrayList<String> codeList = new ArrayList<>(); //現在の投稿の挿入するソース
 
-
-	private FileClipView clipView;
-	private final List<MessageView> messageList = Collections.synchronizedList(new ArrayList<MessageView>());
-	private final TalkActivity context;
-	private final ViewGroup parent;
-	private int editingPostId = -1; //編集中の投稿のID
-	private int replyPostId = -1; //リプライ用の一時保存変数
-	private ArrayList<FileInfo> postFileData = new ArrayList<>();
-	private ArrayList<String> enqueteList = new ArrayList<>(); //現在の投稿のアンケート
-	private ArrayList<String> codeList = new ArrayList<>(); //現在の投稿の挿入するソース
-
-	public TalkManager(TalkActivity context, ViewGroup parent) {
-		this.context = context;
-		this.parent = parent;
-		this.clipView = new FileClipView(context);
+	public static void start(TalkActivity context) {
+		TalkManager.context = context;
+		TalkManager.clipView = (FileClipView)context.findViewById(R.id.file_clip_view);
+		((ListView)context.findViewById(R.id.talk_scroll_view)).setAdapter(parent);
 	}
 
-	public final void init() throws SwallowException, IOException, ClassNotFoundException {
+	public final static void init() throws SwallowException, IOException, ClassNotFoundException {
 
 		UserInfoManager.reload();
 
@@ -71,7 +79,7 @@ public class TalkManager {
 
 	}
 
-	public final void pushMessageList() {
+	public final static void pushMessageList() {
 		//レイアウトの更新
 		for (int i = 0; i < messageList.size(); i++) {
 			MessageView mv = messageList.get(i);
@@ -97,7 +105,7 @@ public class TalkManager {
 		}
 	}
 
-	public final ArrayList<MessageView> loadPreviousMessage() {
+	public final static ArrayList<MessageView> loadPreviousMessage() {
 
 		if (!UserInfoManager.reload()) return null;
 
@@ -121,7 +129,7 @@ public class TalkManager {
 		return newMessageList;
 	}
 
-	public final ArrayList<MessageView> loadNextMessage() {
+	public final static ArrayList<MessageView> loadNextMessage() {
 
 		if (!UserInfoManager.reload()) return null;
 
@@ -144,7 +152,7 @@ public class TalkManager {
 		return newMessageList;
 	}
 
-	public final ArrayList<MessageView> loadPreviousMessageUntil(long until) {
+	public final static ArrayList<MessageView> loadPreviousMessageUntil(long until) {
 
 		if (!UserInfoManager.reload()) return null;
 
@@ -168,7 +176,7 @@ public class TalkManager {
 		return newMessageList;
 	}
 
-	public final ArrayList<MessageView> refreshOnTagSelectChanged() throws SwallowException {
+	public final static ArrayList<MessageView> refreshOnTagSelectChanged() throws SwallowException {
 
 		//messageListの更新
 		messageList.clear();
@@ -185,41 +193,51 @@ public class TalkManager {
 		return newMessageList;
 	}
 
-	public final void refreshOnUserInfoChanged_1() {
+	public final static void refreshOnUserInfoChanged_1() {
 
 		UserInfoManager.reload();
 
 		TagInfoManager.reload();
 	}
 
-	public final void refreshOnUserInfoChanged_2() {
+	public final static void refreshOnUserInfoChanged_2() {
 		//messageListの更新
 		for (MessageView mv : messageList) {
 			mv.refleshOnUserInfoChanged();
 		}
 	}
 
-//	public final ArrayList<MessageView> refreshOnUserSelected() {
-//		messageList.clear();
-//
-//	}
+	public final ArrayList<MessageView> refreshOnUserSelected() throws SwallowException{
+		messageList.clear();
+		SCM.initMessageList(messageList);
 
-	public final MessageView submit(String text) throws SwallowException {
-        //ファイル関連
+		//レイアウトの更新
+		ArrayList<MessageView> newMessageList = new ArrayList<>();
+		for (int i = 0; i < messageList.size(); i++) {
+			MessageView mv = messageList.get(i);
+			Animation anim = createAnimationOnInit(i);
+			mv.anim = anim;
+			newMessageList.add(mv);
+		}
+		return newMessageList;
+	}
+
+	public final static void submit(String text) throws SwallowException {
+		//ファイル関連
 		ArrayList<Integer> fileId = new ArrayList<>();
-		ArrayList<FileInfo> postFileData = (ArrayList<FileInfo>)this.postFileData.clone();
+		ArrayList<FileInfo> postFileData = (ArrayList<FileInfo>)TalkManager.postFileData.clone();
 		for (FileInfo info : postFileData) {
 			Swallow.File file = info.send();
 			int fileID = file.getFileID();
 			fileId.add(fileID);
 		}
-        //コード挿入関連
-        StringBuilder sb = new StringBuilder(text);
-        for (String code : codeList) {
-            sb.append(MessageView.MESSAGE_SEPARATOR);
-            sb.append(code);
-        }
-        text = sb.toString();
+		//コード挿入関連
+		StringBuilder sb = new StringBuilder(text);
+		for (String code : codeList) {
+			sb.append(MessageView.MESSAGE_SEPARATOR);
+			sb.append(code);
+		}
+		text = sb.toString();
 		Message mInfo;
 		if (isEditMode()) {
 			mInfo = SCM.editMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, TagInfoManager.getSelectedTagIDForSend(), null, enqueteList.toArray(new String[0]), editingPostId);
@@ -227,17 +245,11 @@ public class TalkManager {
 			mInfo = SCM.sendMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, TagInfoManager.getSelectedTagIDForSend(), null, enqueteList.toArray(new String[0]));
 		}
 		enqueteList.clear();
-		this.postFileData.clear();
-        codeList.clear();
-
-		MessageView mv = new MessageView(mInfo);
-		Animation anim = createAnimationOnReflesh(5);
-		mv.anim = anim;
-		messageList.add(mv);
-		return mv;
+		TalkManager.postFileData.clear();
+		codeList.clear();
 	}
 
-	private final Animation createAnimationOnInit(int index) {
+	private final static Animation createAnimationOnInit(int index) {
 		TranslateAnimation animation = new TranslateAnimation(
 				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
 				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
@@ -249,7 +261,7 @@ public class TalkManager {
 		return animation;
 	}
 
-	private final Animation createAnimationOnReflesh(int index) {
+	private final static Animation createAnimationOnReflesh(int index) {
 		TranslateAnimation animation = new TranslateAnimation(
 				TranslateAnimation.RELATIVE_TO_SELF, -1.0f,
 				TranslateAnimation.RELATIVE_TO_SELF, 0,
@@ -260,29 +272,27 @@ public class TalkManager {
 		return animation;
 	}
 
-	public final void addMessageViewToPrev(MessageView mv) {
+	public final static void addMessageViewToPrev(MessageView mv) {
 		LineView lv = new LineView(context);
 		lv.setAnimation(mv.anim);
-		parent.addView(lv, 0);
-		parent.addView(mv, 0, mv.lp);
+		parent.add(mv, 0);
 		mv.initOnMainThread();
 		//ViewFlipperのアニメーションとかぶるので、若干遅延させる
 //		mv.setAnimation(mv.anim);
 //		mv.invalidate();
 	}
 
-	public final void addMessageViewToNext(MessageView mv) {
+	public final static void addMessageViewToNext(MessageView mv) {
 		LineView lv = new LineView(context);
 		lv.setAnimation(mv.anim);
-		parent.addView(lv);
-		parent.addView(mv, mv.lp);
+		parent.add(mv);
 		//ViewFlipperのアニメーションとかぶるので、若干遅延させる
 		mv.setAnimation(mv.anim);
 		mv.invalidate();
 		mv.initOnMainThread();
 	}
 
-	public final void changeMessageView(MessageView after) {
+	public final static void changeMessageView(MessageView after) {
 		for (int i = 0; i < messageList.size(); i++) {
 			if (messageList.get(i).mInfo.getPostID() == editingPostId) {
 				messageList.remove(i);
@@ -293,40 +303,15 @@ public class TalkManager {
 			}
 		}
 		for (int i = 0; i < parent.getChildCount(); i++) {
-			View v = parent.getChildAt(i);
-			if (v instanceof MessageView) {
-				MessageView mv = (MessageView)v;
-				if (mv.mInfo.getPostID() == editingPostId) {
-					parent.removeViewAt(i);
-					parent.addView(after, i);
-				}
+			MessageView mv = parent.getChildAt(i);
+			if (mv.mInfo.getPostID() == editingPostId) {
+				parent.removeAt(i);
+				parent.add(after, i);
 			}
 		}
 	}
 
-	private final byte[] convertToByteArray(InputStream inputStream) throws IOException {
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		byte [] buffer = new byte[1024];
-		while(true) {
-			int len = inputStream.read(buffer);
-			if(len < 0) {
-				break;
-			}
-			bout.write(buffer, 0, len);
-		}
-		return bout.toByteArray();
-	}
-
-	public final Message findMessageById(int postId) {
-		try {
-			return SCM.swallow.findMessage(null, null, null, null, new Integer[]{postId}, null, null, null, null, null, null, null, null)[0];
-		} catch (SwallowException e) {
-			MyUtils.showShortToast(context, "メッセージの検索に失敗しました");
-		}
-		return null;
-	}
-
-	public final MessageView findMessageViewById(int postId) {
+	public final static MessageView findMessageViewById(int postId) {
 		for (MessageView mv : messageList) {
 			if (mv.mInfo.getPostID() == postId) {
 				return mv;
@@ -335,7 +320,7 @@ public class TalkManager {
 		return null;
 	}
 
-	public final File findFileById(int id) {
+	public final static File findFileById(int id) {
 		try {
 			return SCM.swallow.findFile(null, null, null, null, new Integer[]{id}, null, null, null)[0];
 		} catch (SwallowException e) {
@@ -344,34 +329,7 @@ public class TalkManager {
 		return null;
 	}
 
-
-
-	private final void saveMessageViews(final ArrayList<MessageView> mvList) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					ByteArrayOutputStream baos;
-					ObjectOutputStream oos = new ObjectOutputStream(baos = new ByteArrayOutputStream());
-					for (MessageView mv : mvList) {
-						String key = MyUtils.MESSAGE_VIEW_KEY + mv.mInfo.getPostID();
-						if (MyUtils.sp.getString(key,  null) == null) {
-							//保存されていなかったら
-							oos.writeObject(mv);
-							String str = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT).trim();
-							MyUtils.sp.edit().putString(key , str);
-						}
-					}
-					oos.close();
-					baos.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-	}
-
-	public void run() {
+	public static void run() {
 		//画面サイズ取得
 		WindowManager wm = (WindowManager)context.getSystemService(TalkActivity.WINDOW_SERVICE);
 		Display disp = wm.getDefaultDisplay();
@@ -405,27 +363,27 @@ public class TalkManager {
 		}
 	}
 
-	public final boolean isReplyMode() {
+	public static final boolean isReplyMode() {
 		return replyPostId != -1;
 	}
 
-	public final void startReply(int replyPostId) {
-		this.replyPostId = replyPostId;
+	public static final void startReply(int replyPostId) {
+		TalkManager.replyPostId = replyPostId;
 		((TextView)context.findViewById(R.id.input_explain_text)).setText("リプなう");
 	}
 
-	public final void endReply() {
+	public static final void endReply() {
 		replyPostId = -1;
 		((EditText)context.findViewById(R.id.input_text)).setText("");
 		clearFile();
 		clearEnquete();
 	}
 
-	public final boolean isEditMode() {
+	public static final boolean isEditMode() {
 		return editingPostId != -1;
 	}
 
-	public final void startEdit(int editingPostId) {
+	public static final void startEdit(int editingPostId) {
 
 		((TextView)context.findViewById(R.id.input_explain_text)).setText("編集なう");
 		//編集するMessageViewを検索
@@ -433,26 +391,26 @@ public class TalkManager {
 		//送信側のタグ選択状況を変更
 		TagInfoManager.setSelection(mv.mInfo.getTagID());
 		//タグ選択リストを変更
-				((Button) context.findViewById(R.id.tag_select_button)).setText(TagInfoManager.getSelectedTagText());
+		((Button) context.findViewById(R.id.tag_select_button)).setText(TagInfoManager.getSelectedTagText());
 		//入力フォームに入っている文字列を変更
 		((EditText)context.findViewById(R.id.input_text)).setText(mv.mInfo.getMessage());
 
-		this.editingPostId = editingPostId;
+		TalkManager.editingPostId = editingPostId;
 	}
 
-	public final void endEdit() {
+	public static final void endEdit() {
 		editingPostId = -1;
 		((EditText)context.findViewById(R.id.input_text)).setText("");
 		clearFile();
 		clearEnquete();
 	}
 
-	public final void addFileToPost(FileInfo fileInfo) {
+	public static final void addFileToPost(FileInfo fileInfo) {
 		postFileData.add(fileInfo);
 		clipView.addImage(fileInfo.bmp);
 	}
 
-	public final void startPost() {
+	public static final void startPost() {
 		editingPostId = -1;
 		replyPostId = -1;
 
@@ -461,70 +419,82 @@ public class TalkManager {
 
 	}
 
-	public final void endPost() {
+	public static final void endPost() {
 		((EditText)context.findViewById(R.id.input_text_dummy)).setText("");
 		((EditText)context.findViewById(R.id.input_text)).setText("");
 		clearFile();
 		clearEnquete();
 	}
 
-	public final FileClipView getFileClipView() {
+	public static final FileClipView getFileClipView() {
 		return clipView;
 	}
 
-	public final boolean hasFile() {
+	public static final boolean hasFile() {
 		return postFileData.size() > 0;
 	}
 
-	public final boolean hasEnquete() {
+	public static final boolean hasEnquete() {
 		return enqueteList.size() > 0;
 	}
 
-	public final void addEnquete(String enquete) {
+	public static final void addEnquete(String enquete) {
 		enqueteList.add(enquete);
 		((ImageButton)context.findViewById(R.id.enqueteButton)).setBackgroundResource(R.drawable.enquete_selected_selector);
 	}
 
-	public final void clearEnquete() {
+	public static final void clearEnquete() {
 		enqueteList.clear();
 		((ImageButton)context.findViewById(R.id.enqueteButton)).setBackgroundResource(R.drawable.enquete_normal_selector);
 	}
 
-	public final void clearFile() {
+	public static final void clearFile() {
 		postFileData.clear();
 		clipView.clearImage();
 	}
 
-	public final String[] getEnqueteArray() {
+	public static final String[] getEnqueteArray() {
 		return enqueteList.toArray(new String[0]);
 	}
 
-	public final int getFileNum() {
+	public static final int getFileNum() {
 		return postFileData.size();
 	}
 
-	public final FileInfo getFile(int index) {
+	public static final FileInfo getFile(int index) {
 		return postFileData.get(index);
 	}
 
-	public final void removeFile(int index) {
+	public static final void removeFile(int index) {
 		postFileData.remove(index);
 		clipView.removeImage(index);
 	}
 
-    public final void addCode(String code) {
-        codeList.add(code);
-    }
+	public final static void removeAllMessageViews() {
+		parent.clear();
+	}
 
-    public final boolean hasCode() {
-        return codeList.size() > 0;
-    }
+	public final static void deleteMessage(final int postID) {
+		//削除するMessageViewを検索
+		for (int i = 0; i < parent.getChildCount(); i++) {
+			MessageView mv = parent.getChildAt(i);
+			final int index = i;
+			if (mv.mInfo.getPostID() == postID) {
+				new ServerTask(TalkActivity.singleton, "削除失敗") {
+					@Override
+					public void doInSubThread() throws SwallowException {
+						SCM.deleteMessage(postID);
+					}
 
-    public final int getCodeNum() {
-        return codeList.size();
-    }
-
-    public final void removeCode(int index) {
-        codeList.remove(index);
-    }
+					@Override
+					protected void onPostExecute(Boolean aBoolean) {
+						if (aBoolean) {
+							parent.removeAt(index);
+						}
+					}
+				};
+				break;
+			}
+		}
+	}
 }

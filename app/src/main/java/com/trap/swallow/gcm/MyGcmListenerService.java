@@ -31,6 +31,7 @@ import com.trap.swallow.swallow.R;
 import com.trap.swallow.talk.MessageView;
 import com.trap.swallow.talk.MyUtils;
 import com.trap.swallow.talk.TalkActivity;
+import com.trap.swallow.talk.TalkManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -143,23 +144,24 @@ public class MyGcmListenerService extends GcmListenerService {
                 builder.setVibrate(new long[]{1000, 100, 250, 100, 100, 100, 250, 100, 100, 700}); //にっこにっこにー
                 NotificationManager manager = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
                 manager.notify(0, builder.build());
-                if (TalkActivity.singleton != null) {
-                    final ArrayList<MessageView> messageViews = TalkActivity.singleton.tvManager.loadNextMessage();
-
-                    new ServerTask(TalkActivity.singleton, null) {
-
-                        @Override
-                        public void doInSubThread() throws SwallowException {}
-
-                        @Override
-                        protected void onPostExecute(Boolean aBoolean) {
-                            for (MessageView mv : messageViews) {
-                                TalkActivity.singleton.tvManager.addMessageViewToNext(mv);
-                            }
-                        }
-                    };
-                }
             }
+        }
+
+        if (TalkActivity.singleton != null) {
+            final ArrayList<MessageView> messageViews = TalkManager.loadNextMessage();
+
+            new ServerTask(TalkActivity.singleton, null) {
+
+                @Override
+                public void doInSubThread() throws SwallowException {}
+
+                @Override
+                protected void onPostExecute(Boolean aBoolean) {
+                    for (MessageView mv : messageViews) {
+                        TalkManager.addMessageViewToNext(mv);
+                    }
+                }
+            };
         }
     }
 }

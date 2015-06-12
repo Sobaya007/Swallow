@@ -116,19 +116,19 @@ public class SCM {
 			oldestPostedTime = messages[messages.length-1].getPosted();
 	}
 
-//	public static void loadUserMessageToList(List<MessageView> messageList, int userID) throws SwallowException {
-//		Message[] messages = swallow.findMessage(0, INITIAL_LOAD_MESSAGE_NUM, null, null,
-//				null,
-//		for (Message m : messages) {
-//			messageList.add(new MessageView(m));
-//		}
-//		if (messages.length > 0) {
-//			latestPostedTime = messages[0].getPosted();
-//			oldestPostedTime = messages[messages.length - 1].getPosted();
-//		} else {
-//			latestPostedTime = oldestPostedTime = System.currentTimeMillis();
-//		}
-//	}
+	public static void loadUserMessageToList(List<MessageView> messageList, int userID) throws SwallowException {
+		Message[] messages = swallow.findMessage(0, INITIAL_LOAD_MESSAGE_NUM, null, null,
+				null, null, null, null, new Integer[]{userID}, null, null, null, null);
+		for (Message m : messages) {
+			messageList.add(new MessageView(m));
+		}
+		if (messages.length > 0) {
+			latestPostedTime = messages[0].getPosted();
+			oldestPostedTime = messages[messages.length - 1].getPosted();
+		} else {
+			latestPostedTime = oldestPostedTime = System.currentTimeMillis();
+		}
+	}
 
 	public static final void loadTagList(List<Tag> tagInfoList) throws SwallowException {
 		Tag[] tagArray;
@@ -156,7 +156,7 @@ public class SCM {
 		do {
 			User[] u = swallow.findUser(index, index + LOAD_NUM, null, null, null, null, null, null);
 			for (User anU : u) userInfo.add(new UserInfo(anU));
-			index += 5;
+			index += LOAD_NUM;
 		} while (userInfo.size() == LOAD_NUM);
 	}
 

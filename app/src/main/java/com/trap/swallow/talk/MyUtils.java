@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.webkit.MimeTypeMap;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -62,6 +63,10 @@ public class MyUtils {
 
 	public static final  LinearLayout.LayoutParams getLayoutparams(int width, int height) {
 		return new LinearLayout.LayoutParams(width, height);
+	}
+
+	public static final  ListView.LayoutParams getLayoutparamsForListView(int width, int height) {
+		return new ListView.LayoutParams(width, height);
 	}
 
 	public static final byte[] getFileByteArray(int fileId) {
@@ -147,11 +152,11 @@ public class MyUtils {
 	}
 
 	public static void scrollDown() {
-		TalkActivity.singleton.scrollView.fullScroll(ScrollView.FOCUS_DOWN);
+		TalkActivity.singleton.scrollView.smoothScrollToPosition(MessageViewAdapter.getChildCount()-1);
 	}
 
 	public static void scrollUp() {
-		TalkActivity.singleton.scrollView.fullScroll(ScrollView.FOCUS_UP);
+		TalkActivity.singleton.scrollView.smoothScrollToPosition(0);
 	}
 
 	public static final boolean getReceivedFlag() {

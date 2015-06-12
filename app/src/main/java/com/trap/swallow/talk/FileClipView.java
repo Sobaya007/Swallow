@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 
@@ -22,11 +23,17 @@ public final class FileClipView extends View {
 
 	FileClipView(Context context) {
 		super(context);
+		init();
+	}
+
+	public FileClipView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init();
+	}
+
+	private final void init() {
 		back = BitmapFactory.decodeResource(getResources(), R.drawable.clip_backward);
 		forward = BitmapFactory.decodeResource(getResources(), R.drawable.clip_forward);
-		rect = new RectF();
-		rect.set(100, 50, 140, 150);
-		setLayoutParams(MyUtils.getLayoutparams(240, 200));
 	}
 
 	void addImage(Bitmap bmp) {
@@ -47,6 +54,8 @@ public final class FileClipView extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		int width = getHeight() * back.getWidth() / back.getHeight();
+		Rect rect = new Rect((getWidth() - width) / 2, 0, (getWidth() + width) / 2, getHeight());
 		canvas.drawBitmap(back, new Rect(0, 0, back.getWidth(), back.getHeight()), rect, null);
 		float dAngle = 120.0f / (bitmaps.size()+1);
 		canvas.save();
@@ -59,4 +68,6 @@ public final class FileClipView extends View {
 		canvas.restore();
 		canvas.drawBitmap(forward, new Rect(0, 0, forward.getWidth(), forward.getHeight()), rect, null);
 	}
+
+
 }

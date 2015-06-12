@@ -78,6 +78,10 @@
                 android:layout_weight="0.25"
                 android:orientation="horizontal"
                 android:gravity="center">
+                <com.trap.swallow.talk.FileClipView
+                    android:id="@+id/file_clip_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
             </LinearLayout>
 
             <LinearLayout

@@ -1,6 +1,7 @@
 package com.trap.swallow.login;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,10 +28,7 @@ public class LogInActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_login);
 
-		final EditText userNameInput = (EditText)findViewById(R.id.userNameInput);
-		final EditText passwordInput = (EditText)findViewById(R.id.passwordInput);
 		//PreferenceからSwllowSecurityのSerialコードをロード
 		String serial = MyUtils.sp.getString(MyUtils.SWALLOW_SECURITY_SERIALIZE_CODE, null);
 		//Serialコードがあったなら
@@ -43,30 +41,51 @@ public class LogInActivity extends Activity {
 				e.printStackTrace();
 			}
 			final SwallowSecurity sec = security;
-			final Swallow swallow = sec.getSwallow();
-			new ServerTask(this, "") {
-				@Override
-				public void doInSubThread() throws SwallowException {
-					swallow.modifyUser(null, null, null, null, null, null, null, null, null, null, null);
-				}
-
-				@Override
-				protected void onPostExecute(Boolean aBoolean) {
-					if (aBoolean) {
-						toNext(swallow, sec);
+			if (sec != null) {
+				final Swallow swallow = sec.getSwallow();
+				new ServerTask(this, "") {
+					@Override
+					public void doInSubThread() throws SwallowException {
+						swallow.modifyUser(null, null, null, null, null, null, null, null, null, null, null);
 					}
-				}
-			};
+
+					@Override
+					protected void onPostExecute(Boolean aBoolean) {
+						if (aBoolean) {
+							toNext(swallow, sec);
+						} else {
+							init();
+						}
+					}
+				};
+			} else {
+				init();
+			}
+		} else {
+			init();
 		}
+
+		super.onCreate(savedInstanceState);
+	}
+
+	private final void init() {
+		setContentView(R.layout.activity_login);
+
+		final EditText userNameInput = (EditText)findViewById(R.id.userNameInput);
+		final EditText passwordInput = (EditText)findViewById(R.id.passwordInput);
 		//ログインボタンの設定
 		Button button = (Button)findViewById(R.id.login_button);
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				final ProgressDialog dialog = new ProgressDialog(LogInActivity.this);
+				dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+				dialog.setMessage("読み込み中...");
 				new ServerTask(LogInActivity.this, "ログインできません") {
 					@Override
 					public void doInSubThread() throws SwallowException {
 						//Serialコードがなかったら、サーバーにユーザー名とパスワードを送ってログイン
+
 						SwallowSecurity sec;
 						sec = new SwallowSecurity();
 						sec.login(userNameInput.getText().toString(), passwordInput.getText().toString());
@@ -74,6 +93,11 @@ public class LogInActivity extends Activity {
 						MyUtils.sp.edit().putString(MyUtils.SWALLOW_SECURITY_SERIALIZE_CODE, sec.serialize()).apply();
 						//TalkActivityへ
 						toNext(new SwallowImpl(sec), sec);
+					}
+
+					@Override
+					protected void onPostExecute(Boolean aBoolean) {
+						dialog.dismiss();
 					}
 				};
 			}
@@ -88,7 +112,6 @@ public class LogInActivity extends Activity {
 				startActivity(i);
 			}
 		});
-		super.onCreate(savedInstanceState);
 	}
 
 	private final void toNext(Swallow swallow, SwallowSecurity sec) {

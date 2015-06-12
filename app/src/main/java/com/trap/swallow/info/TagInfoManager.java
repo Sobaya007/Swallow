@@ -15,8 +15,8 @@ import com.trap.swallow.talk.MyUtils;
  */
 public final class TagInfoManager {
 
-    private static final String SELECTED_TAG_KEY = "TAG_SELECTED3";
-    private static final String NOTIFY_TAG_KEY = "TAG_NOTIFY3";
+    private static final String SELECTED_TAG_KEY = "TAG_SELECTED4";
+    private static final String NOTIFY_TAG_KEY = "TAG_NOTIFY4";
 
     private static List<TagInfo> tagInfoList = Collections.synchronizedList(new ArrayList<TagInfo>());
 
@@ -37,19 +37,49 @@ public final class TagInfoManager {
             TagInfoManager.selectTag(newTag);
         }
 
+        for (TagInfo t : getSelectedTag()) {
+            if (t == null) {
+                MyUtils.sp.edit().putString(SELECTED_TAG_KEY,
+                        Integer.toString(findTagByIndex(0, true).tag.getTagID())).apply();
+                break;
+            }
+        }
+
         if (MyUtils.sp.getString(SELECTED_TAG_KEY, null) == null) {
-            selectTag(TagInfoManager.findTagByIndex(0, true));
+            MyUtils.sp.edit().putString(SELECTED_TAG_KEY,
+                    Integer.toString(findTagByIndex(0, true).tag.getTagID())).apply();
         }
+
         for (String selected : MyUtils.sp.getString(SELECTED_TAG_KEY, null).split(",")) {
-            if (selected.length() > 0)
-                findTagByID(Integer.parseInt(selected)).isSelected = true;
+            if (selected.length() > 0) {
+                TagInfo tag = findTagByID(Integer.parseInt(selected));
+                if (tag != null) {
+                    tag.isSelected = true;
+                } else {
+                    selectTag(findTagByIndex(0, true));
+                }
+            }
         }
+
         if (MyUtils.sp.getString(NOTIFY_TAG_KEY, null) == null)
             setAllNotification();
+        else {
+            String[] str = MyUtils.sp.getString(NOTIFY_TAG_KEY, null).split(",");
+            for (String s : str) {
+                if (findTagByID(Integer.parseInt(s)) == null) {
+                    setAllNotification();
+                    break;
+                }
+            }
+        }
         return true;
     }
 
     public static TagInfo findTagByID(int ID) {
+        for (TagInfo t : tagInfoList)
+            if (t.tag.getTagID() == ID)
+                return t;
+        reload();
         for (TagInfo t : tagInfoList)
             if (t.tag.getTagID() == ID)
                 return t;
@@ -60,11 +90,23 @@ public final class TagInfoManager {
         for (TagInfo t : tagInfoList)
             if (t.tag.getTagName().equals(name))
                 return t;
+        reload();
+        for (TagInfo t : tagInfoList)
+            if (t.tag.getTagName().equals(name))
+                return t;
         return null;
     }
 
     public static TagInfo findTagByIndex(int index, boolean visible) {
         int count = 0;
+        for (TagInfo t : tagInfoList) {
+            if (t.tag.getInvisible() == visible) continue;
+            if (index == count) return t;
+            count++;
+        }
+        reload();
+
+        count = 0;
         for (TagInfo t : tagInfoList) {
             if (t.tag.getInvisible() == visible) continue;
             if (index == count) return t;

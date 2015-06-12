@@ -34,12 +34,9 @@ public final class UserInfoManager {
         for (UserInfo u : userInfoList)
             if (u.user.getUserID() == ID)
                 return u;
-        return null;
-    }
-
-    public static UserInfo findUserByName(String name) {
+        reload();
         for (UserInfo u : userInfoList)
-            if (u.user.getUserName().equals(name))
+            if (u.user.getUserID() == ID)
                 return u;
         return null;
     }

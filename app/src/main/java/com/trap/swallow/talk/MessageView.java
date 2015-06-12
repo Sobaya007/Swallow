@@ -70,7 +70,6 @@ public class MessageView extends LinearLayout{
 
     public static final String MESSAGE_SEPARATOR = "```";
 
-    public LayoutParams lp;
     public Message mInfo;
 
     public int answerIndex;
@@ -89,7 +88,6 @@ public class MessageView extends LinearLayout{
         super(TalkActivity.singleton);
 
         final TalkActivity context = TalkActivity.singleton;
-        final TalkManager tvManager = context.tvManager;
 
         this.mInfo = mInfo;
 
@@ -135,18 +133,18 @@ public class MessageView extends LinearLayout{
                                 AsyncTask<Void, Void, ArrayList<MessageView>> task = new AsyncTask<Void, Void, ArrayList<MessageView>>() {
                                     @Override
                                     protected ArrayList<MessageView> doInBackground(Void... params) {
-                                        return tvManager.loadPreviousMessageUntil(until);
+                                        return TalkManager.loadPreviousMessageUntil(until);
                                     }
 
                                     @Override
                                     protected void onPostExecute(ArrayList<MessageView> messageViews) {
                                         if (messageViews != null) {
                                             for (MessageView mv : messageViews)
-                                                tvManager.addMessageViewToPrev(mv);
+                                                TalkManager.addMessageViewToPrev(mv);
 
-                                            MessageView mv = tvManager.findMessageViewById(postId);
+                                            MessageView mv = TalkManager.findMessageViewById(postId);
                                             if (mv != null) {
-                                                context.scrollView.smoothScrollTo(0, (int)mv.getY());
+//                                                context.scrollView.smoothScrollTo(0, (int)mv.getY());
                                             }
                                         } else {
                                             MyUtils.showShortToast(context, "読み込みに失敗しました");
@@ -160,8 +158,12 @@ public class MessageView extends LinearLayout{
                 }
             }
         }
-
-        final  UserInfo sender = UserInfoManager.findUserByID(mInfo.getUserID());
+        UserInfo user = UserInfoManager.findUserByID(mInfo.getUserID());
+        if (user == null) {
+            UserInfoManager.reload();
+            user = UserInfoManager.findUserByID(mInfo.getUserID());
+        }
+        final  UserInfo sender = user;
         //アイコン
         {
             ImageView iconView = (ImageView)v.findViewById(R.id.icon_image);
@@ -184,7 +186,7 @@ public class MessageView extends LinearLayout{
                             new ServerTask(context, "画像の読み込みに失敗しました") {
                                 @Override
                                 public void doInSubThread() throws SwallowException {
-                                    Swallow.File file = tvManager.findFileById(sender.user.getImage());
+                                    Swallow.File file = TalkManager.findFileById(sender.user.getImage());
                                     Intent intent = new Intent();
                                     intent.setType(file.getFileType());
                                     intent.setAction(Intent.ACTION_VIEW);
@@ -238,7 +240,7 @@ public class MessageView extends LinearLayout{
             if (fileIdArray != null) {
                 LinearLayout fileLayout = (LinearLayout)v.findViewById(R.id.file_layout);
                 for (final int id : fileIdArray) {
-                    final Swallow.File file = tvManager.findFileById(id);
+                    final Swallow.File file = TalkManager.findFileById(id);
                     LinearLayout layout = new LinearLayout(context);
                     layout.setOrientation(LinearLayout.VERTICAL);
                     layout.setLayoutParams(MyUtils.getLayoutparams(MyUtils.WC, MyUtils.WC));
@@ -575,7 +577,7 @@ public class MessageView extends LinearLayout{
             replyButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    tvManager.startReply(mInfo.getPostID());
+                    TalkManager.startReply(mInfo.getPostID());
                     context.shiftToInputForm();
                 }
             });
@@ -599,13 +601,15 @@ public class MessageView extends LinearLayout{
         context.registerForContextMenu(this);
 
         //このビュー自身のマージン情報を含んだLayoutParams
-        lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        lp.setMargins(20, 20, 30, 0);
+        ListView.LayoutParams lp = MyUtils.getLayoutparamsForListView(ListView.LayoutParams.MATCH_PARENT, ListView.LayoutParams.WRAP_CONTENT);
+//        lp.setMargins(20, 20, 30, 0);
+        setLayoutParams(lp);
     }
 
     public final void initOnMainThread() {
-        //コード
+        //メインスレッドじゃないとWebViewがぬるぽ吐くのでここに
         LinearLayout messageLayout = (LinearLayout)v.findViewById(R.id.message_layout);
+        messageLayout.removeAllViews();
         for (int i = 0; i < strings.length; i++) {
             if (i % 2 == 0) messageLayout.addView(createMessageView(strings[i]));
             else            messageLayout.addView(createWebView(strings[i]));

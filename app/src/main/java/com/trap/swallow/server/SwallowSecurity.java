@@ -1,10 +1,5 @@
 package com.trap.swallow.server;
 
-import android.util.Base64;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -26,10 +21,15 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import android.util.Base64;
+
 /*
  * ログイン関係
  */
-@SuppressWarnings({ "unused", "serial" })
+@SuppressWarnings("serial")
 public class SwallowSecurity implements Serializable {
 	// セッションID
 	private String sessionID;
@@ -148,9 +148,9 @@ public class SwallowSecurity implements Serializable {
 	 * セッション破棄
 	 * 参考: https://gist.github.com/kazsw/1a6242f83da0cf61a84e
 	 */
-	public SwallowSecurity logout(String userName, String password) throws SwallowException {
+	public SwallowSecurity logout() throws SwallowException {
 		try {
-			String param = "user=" + userName + "&pass=" + password + "&session=" + sessionID;
+			String param = "session=" + sessionID + "&key=" + base64Enc(key) + "&iv=" + base64Enc(iv);
 			String[] resp = httpPost("auth", "auth=logout&data=" + base64Enc(rsaEnc(fetchKey(), param.getBytes()))).split(": ");
 
 			if("NG".equals(resp[0])){

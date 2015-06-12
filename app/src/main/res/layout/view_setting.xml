@@ -172,6 +172,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal">
 
+            <CheckBox
+                android:id="@+id/setting_yojo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -181,9 +186,10 @@
                 android:layout_marginRight="10sp" />
 
             <CheckBox
-                android:id="@+id/setting_yojo"
+                android:id="@+id/setting_background"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -192,10 +198,6 @@
                 android:layout_marginLeft="10sp"
                 android:layout_marginRight="10sp" />
 
-            <CheckBox
-                android:id="@+id/setting_background"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <LinearLayout

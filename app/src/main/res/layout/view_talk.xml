@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:focusableInTouchMode="true"
-    android:background="#0000">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:focusableInTouchMode="true"
+                android:background="#0000">
 
     <LinearLayout
         android:id="@+id/input_layout"
@@ -60,19 +60,21 @@
         </LinearLayout>
     </LinearLayout>
 
-    <ScrollView
-        android:id="@+id/talk_scroll_view"
+    <android.support.v4.widget.SwipeRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swipe_refresh_widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/input_layout"
-        android:focusable="true"
-        android:focusableInTouchMode="true" >
-
-        <LinearLayout
-            android:id="@+id/left_draw"
+        android:layout_above="@id/input_layout">
+        <ListView
+            android:id="@+id/talk_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </ScrollView>
+            android:layout_height="match_parent"
+            android:layout_above="@id/input_layout"
+            android:focusable="true"
+            android:focusableInTouchMode="true" >
+
+        </ListView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </RelativeLayout>
