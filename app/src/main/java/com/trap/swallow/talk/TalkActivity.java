@@ -1,6 +1,7 @@
 package com.trap.swallow.talk;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
@@ -56,6 +57,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,12 +65,16 @@ import android.widget.ViewFlipper;
 
 import com.trap.swallow.gcm.RegistrationIntentService;
 import com.trap.swallow.info.FileInfo;
-import com.trap.swallow.info.TagInfo;
+import com.trap.swallow.info.TagInfoManager;
+import com.trap.swallow.info.UserInfo;
+import com.trap.swallow.info.UserInfoManager;
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.ServerTask;
 import com.trap.swallow.server.Swallow;
 import com.trap.swallow.server.SwallowException;
 import com.trap.swallow.swallow.R;
+
+import org.w3c.dom.Text;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -88,6 +94,7 @@ public class TalkActivity extends AppCompatActivity {
 	private static final int UP_BUTTON_ID = 1;
 	private static final int DOWN_BUTTON_ID = 2;
 	private static final int SETTING_BUTTON_ID = 3;
+	private static final int LOGOUT_BUTTON_ID = 4;
 
 	public TalkManager tvManager;
 	public ScrollView scrollView;
@@ -142,61 +149,26 @@ public class TalkActivity extends AppCompatActivity {
 		//いろいろ置くためのLayout
 		FrameLayout mainLayout = new FrameLayout(this);
 
-		//bgViewを初期化
 		initBackgroundView(mainLayout);
-
-		//Flipperを初期化
 		initFlipper(mainLayout);
-
-		//重力センサーの初期化
 		initGravitySensor();
-
-		//ScrollViewを取得しておく
 		scrollView = (ScrollView)findViewById(R.id.talk_scroll_view);
-
-		//tvManagerの初期化
 		initTalkManager();
-
-		//画面遷移のアニメーションの初期化
 		initAnimations();
-
-		//入力ボックスの初期化
 		initInputText();
-
-		//kwskボタンの初期化
 		initDetailButton();
-
-		//talk_view側投稿ボタンの初期化
 		initSubmitButton();
-
-		//talk_view側入力ボックスの初期化
 		initInputBoxOnTalkView();
-
-		//タグ選択ボタンの初期化
 		initTagSelectButton();
-
-		//input_view側送信ボタンの初期化
 		initSendMessageButton();
-
-		//ファイルアップロードボタンの初期化
 		initFileUploadButton();
-
-		//タグ検索ボックスを初期化
 		initTagSearchBox();
-
-		//ドロワーの初期化
+		initUserSearchBox();
 		initDrawer();
-
-		//タグ選択ダイアログの初期化
 		initTagSelectDialog();
-
-		//アンケートボタンの初期化
 		initEnqueteButton();
-
-		//既読ボタンの初期化
 		initReceivedCheckBox();
-
-		//設定画面の初期化
+		initInsertCodeButton();
 		initSetting();
 
 		//別スレッドを起動
@@ -234,14 +206,14 @@ public class TalkActivity extends AppCompatActivity {
 				break;
 			case UP_BUTTON_ID:
 				MyUtils.scrollUp();
-//				scrollView.fullScroll(ScrollView.FOCUS_UP);
 				break;
 			case DOWN_BUTTON_ID:
 				MyUtils.scrollDown();
-//				scrollView.fullScroll(ScrollView.FOCUS_DOWN);
 				break;
 			case SETTING_BUTTON_ID:
 				shiftToSetting();
+				break;
+			case LOGOUT_BUTTON_ID:
 				break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -256,7 +228,7 @@ public class TalkActivity extends AppCompatActivity {
 			MessageView mv = (MessageView) v;
 			//テキストに対する長押し時
 			//自分の投稿なら
-			if (mv.mInfo.getUserID() == tvManager.getMyUserInfo().user.getUserID()) {
+			if (mv.mInfo.getUserID() == UserInfoManager.getMyUserInfo().user.getUserID()) {
 				menu.setHeaderTitle("メッセージ操作");
 				menu.add(mv.mInfo.getPostID(), 0, Menu.NONE, "編集");
 				menu.add(mv.mInfo.getPostID(), 1, Menu.NONE, "削除");
@@ -330,13 +302,6 @@ public class TalkActivity extends AppCompatActivity {
 	}
 
 	@Override
-	protected void onStop() {
-		//タグの選択状況をプリファレンスに保存
-		MyUtils.sp.edit().putString(MyUtils.SELECTED_TAG_KEY, tvManager.getSelectedTagIDText()).apply();
-		super.onStop();
-	}
-
-	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == RESULT_OK) {
 			switch (requestCode) {
@@ -345,7 +310,7 @@ public class TalkActivity extends AppCompatActivity {
 						//受け取ったデータのパスを取得
 						Uri uri = data.getData();
 
-						FileInfo file = new FileInfo(getContentResolver(), getResources(), uri, tvManager.getSelectedTagIDList());
+						FileInfo file = new FileInfo(getContentResolver(), getResources(), uri);
 						tvManager.addFileToPost(file);
 					}
 					catch (Exception e) {
@@ -358,7 +323,7 @@ public class TalkActivity extends AppCompatActivity {
 						//受け取ったデータのパスを取得
 						Uri uri = data.getData();
 
-						FileInfo file = new FileInfo(getContentResolver(), getResources(), uri, tvManager.getSelectedTagIDList());
+						FileInfo file = new FileInfo(getContentResolver(), getResources(), uri);
 						ImageView iv = (ImageView)findViewById(R.id.setting_image);
 						iv.setImageBitmap(file.bmp);
 						userImageFile = file;
@@ -383,10 +348,12 @@ public class TalkActivity extends AppCompatActivity {
 				.setIcon(R.drawable.scroll_up);
 		MenuItem item4 = menu.add(0, DOWN_BUTTON_ID, 2, "下へ")
 				.setIcon(R.drawable.scroll_down);
+		MenuItem item5 = menu.add(0, LOGOUT_BUTTON_ID, 4, "ログアウト");
 		MenuItemCompat.setShowAsAction(item, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 		MenuItemCompat.setShowAsAction(item2, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 		MenuItemCompat.setShowAsAction(item3, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 		MenuItemCompat.setShowAsAction(item4, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+		MenuItemCompat.setShowAsAction(item5, MenuItemCompat.SHOW_AS_ACTION_NEVER);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -406,11 +373,11 @@ public class TalkActivity extends AppCompatActivity {
 	private final void initGCM() {
 		//GCMへの登録が済んでいなかったら
 //		if (!MyUtils.sp.getBoolean(MyUtils.GCM_REGISTRATION_FLAG, false)) {
-			//IntentでGCMへ登録
-			Intent intent = new Intent(this, RegistrationIntentService.class);
-			startService(intent);
-			//PreferenceにGCMへの登録が済んだことを通知
-			MyUtils.sp.edit().putBoolean(MyUtils.GCM_REGISTRATION_FLAG, true).apply();
+		//IntentでGCMへ登録
+		Intent intent = new Intent(this, RegistrationIntentService.class);
+		startService(intent);
+		//PreferenceにGCMへの登録が済んだことを通知
+		MyUtils.sp.edit().putBoolean(MyUtils.GCM_REGISTRATION_FLAG, true).apply();
 //		}
 	}
 
@@ -431,7 +398,7 @@ public class TalkActivity extends AppCompatActivity {
 	private final void initFlipper(FrameLayout mainLayout) {
 		ViewFlipper flipper = (ViewFlipper)findViewById(R.id.flipper);
 		flipper.addView(mainLayout);
-		flipper.addView(inputView  = LayoutInflater.from(this).inflate(R.layout.view_input, null));
+		flipper.addView(inputView = LayoutInflater.from(this).inflate(R.layout.view_input, null));
 		flipper.addView(settingView = LayoutInflater.from(this).inflate(R.layout.view_setting, null));
 		flipper.addView(settingTagView = LayoutInflater.from(this).inflate(R.layout.view_setting_tag, null));
 	}
@@ -470,6 +437,7 @@ public class TalkActivity extends AppCompatActivity {
 				tvManager.pushMessageList(); //このスレッドでやらないとまずい処理
 				//タグ一覧表示ビューの設定
 				initTagSelectList();
+				initUserSelectList();
 			}
 		};
 
@@ -539,7 +507,7 @@ public class TalkActivity extends AppCompatActivity {
 
 	private final void initTagSelectButton() {
 		final Button tagButton = (Button)findViewById(R.id.tag_select_button);
-		tagButton.setText(tvManager.getSelectedTagText());
+		tagButton.setText(TagInfoManager.getSelectedTagText());
 		tagButton.setOnClickListener(new OnClickListener() {
 			//タグボタンが押された時の処理
 			@Override
@@ -577,7 +545,6 @@ public class TalkActivity extends AppCompatActivity {
 		uploadLayout.addView(tvManager.getFileClipView());
 	}
 
-	//ドロワーのタグリストを初期化
 	private final void initTagSelectList() {
 		final ListView tagSelectList = (ListView)findViewById(R.id.drawer_tag_select_list);
 		tagSelectList.setOnItemClickListener(new OnItemClickListener() {
@@ -585,14 +552,14 @@ public class TalkActivity extends AppCompatActivity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
 									long arg3) {
 				String tagName = (String) tagSelectList.getItemAtPosition(position);
-				TagInfo selectedTag = tvManager.findVisibleTagByName(tagName);
-				selectedTag.isSelected = !selectedTag.isSelected;
+				TagInfoManager.TagInfo selectedTag = TagInfoManager.findTagByName(tagName);
+				TagInfoManager.selectTag(selectedTag);
 			}
 		});
 	}
 
 	private final void initTagSearchBox() {
-		final EditText searchTagBox = (EditText)findViewById(R.id.drawer_search_box);
+		final EditText searchTagBox = (EditText)findViewById(R.id.drawer_tag_search_box);
 		searchTagBox.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -604,12 +571,12 @@ public class TalkActivity extends AppCompatActivity {
 
 				//タグリストの中から先頭が一致するものを検索
 				if (emptyFlag) {
-					for (int i = 0; i < tvManager.getVisibleTagNum(); i++) {
-						tag.add(tvManager.findVisibleTagByIndex(i).tagName);
+					for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
+						tag.add(TagInfoManager.findTagByIndex(i, true).tag.getTagName());
 					}
 				} else {
-					for (int i = 0; i < tvManager.getVisibleTagNum(); i++) {
-						String tagName = tvManager.findVisibleTagByIndex(i).tagName;
+					for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
+						String tagName = TagInfoManager.findTagByIndex(i, true).tag.getTagName();
 						if (tagName.startsWith(searchWord)) {
 							tag.add(tagName);
 						}
@@ -625,15 +592,75 @@ public class TalkActivity extends AppCompatActivity {
 				tagSelectList.setAdapter(adapter);
 				//選択されている文字列を羅列
 				ArrayList<String> selectedTagNameList = new ArrayList<>();
-				for (int i = 0; i < tvManager.getVisibleTagNum(); i++) {
-					TagInfo t = tvManager.findVisibleTagByIndex(i);
-					if (t.isSelected)
-						selectedTagNameList.add(t.tagName);
+				for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
+					TagInfoManager.TagInfo t = TagInfoManager.findTagByIndex(i, true);
+					if (t.isSelected())
+						selectedTagNameList.add(t.tag.getTagName());
 				}
 				//tagSelectListに選択状況を適用
 				for (int i = 0; i < members.length; i++) {
 					tagSelectList.setItemChecked(i, selectedTagNameList.contains(members[i]));
 				}
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+										  int after) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+	}
+
+	private final void initUserSelectList() {
+		final ListView userSelectList = (ListView)findViewById(R.id.drawer_user_select_list);
+		userSelectList.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+									long arg3) {
+				String userName = (String) userSelectList.getItemAtPosition(position);
+				UserInfo userInfo = UserInfoManager.findUserByName(userName);
+				((DrawerLayout)findViewById(R.id.drawer_layout)).closeDrawers();
+//				ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+
+			}
+		});
+	}
+
+	private final void initUserSearchBox() {
+		final EditText searchTagBox = (EditText)findViewById(R.id.drawer_user_search_box);
+		searchTagBox.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				String searchWord = searchTagBox.getText().toString();
+				boolean emptyFlag = searchWord.length() == 0;
+				//				searchWord = "^" + searchWord;
+
+				ArrayList<String> user = new ArrayList<>();
+
+				//タグリストの中から先頭が一致するものを検索
+				if (emptyFlag) {
+					for (int i = 0; i < UserInfoManager.getUserNum(); i++) {
+						user.add(UserInfoManager.findUserByIndex(i).user.getUserName());
+					}
+				} else {
+					for (int i = 0; i < UserInfoManager.getUserNum(); i++) {
+						String userName = UserInfoManager.findUserByIndex(i).user.getUserName();
+						if (userName.startsWith(searchWord)) {
+							user.add(userName);
+						}
+					}
+				}
+				String[] members = new String[user.size()];
+				for (int i = 0; i < members.length; i++)
+					members[i] = user.get(i);
+				//userSelectListに検索結果を適用
+				ArrayAdapter<String> adapter = new ArrayAdapter<>(TalkActivity.this,
+						android.R.layout.simple_list_item_multiple_choice, members);
+				ListView userSelectList = (ListView) findViewById(R.id.drawer_user_select_list);
+				userSelectList.setAdapter(adapter);
 			}
 
 			@Override
@@ -660,13 +687,14 @@ public class TalkActivity extends AppCompatActivity {
 				//Drawerが開いたとき
 
 				updateTagSelectList();
+				updateUserSelectList();
 
 				//開いた時のタグを保存
 				{
 					tmpList.clear();
-					for (int i = 0; i < tvManager.getVisibleTagNum(); i++) {
-						TagInfo t = tvManager.findVisibleTagByIndex(i);
-						tmpList.add(t.isSelected);
+					for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
+						TagInfoManager.TagInfo t = TagInfoManager.findTagByIndex(i, true);
+						tmpList.add(t.isSelected());
 					}
 				}
 				super.onDrawerOpened(drawerView);
@@ -676,14 +704,16 @@ public class TalkActivity extends AppCompatActivity {
 				//ドロワーが閉じた時の処理
 				//開いた時と選択状況が違ったら更新
 				boolean flag = false;
-				for (int i = 0; i < tvManager.getVisibleTagNum(); i++) {
-					if (tmpList.get(i) != tvManager.findVisibleTagByIndex(i).isSelected) {
+				for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
+					if (tmpList.get(i) != TagInfoManager.findTagByIndex(i, true).isSelected()) {
 						flag = true;
 						break;
 					}
 				}
 				if (flag) {
 					//開いたときと違ったら
+					final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+					progressDialog.show();
 					AsyncTask<Void, Void, ArrayList<MessageView>> task = new AsyncTask<Void, Void, ArrayList<MessageView>>() {
 						@Override
 						protected ArrayList<MessageView> doInBackground(Void... params) {
@@ -691,10 +721,6 @@ public class TalkActivity extends AppCompatActivity {
 							try {
 								return tvManager.refreshOnTagSelectChanged();
 							} catch (SwallowException e) {
-								e.printStackTrace();
-							} catch (ClassNotFoundException e) {
-								e.printStackTrace();
-							} catch (IOException e) {
 								e.printStackTrace();
 							}
 							return null;
@@ -708,15 +734,14 @@ public class TalkActivity extends AppCompatActivity {
 								layout.removeAllViews();
 								for (MessageView mv : messageViews)
 									tvManager.addMessageViewToPrev(mv);
+
 							} else {
 								MyUtils.showShortToast(TalkActivity.this, "更新に失敗しました");
 							}
+							progressDialog.dismiss();
 						}
 					};
-					task.execute((Void)null);
-
-					//タグの選択状況をプリファレンスに保存
-					MyUtils.sp.edit().putString(MyUtils.SELECTED_TAG_KEY, tvManager.getSelectedTagIDText()).apply();
+					task.execute((Void) null);
 				}
 				super.onDrawerClosed(drawerView);
 			}
@@ -783,8 +808,8 @@ public class TalkActivity extends AppCompatActivity {
 		tagChoiceListener = new OnMultiChoiceClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-				TagInfo clickedTag = tvManager.findVisibleTagByIndex(which);
-				clickedTag.isSelected = !clickedTag.isSelected;
+				TagInfoManager.TagInfo clickedTag = TagInfoManager.findTagByIndex(which, true);
+				TagInfoManager.selectTag(clickedTag);
 			}
 		};
 
@@ -895,6 +920,73 @@ public class TalkActivity extends AppCompatActivity {
 		checkBox.setChecked(false);
 	}
 
+	private final void initInsertCodeButton() {
+		final Button codeInsertButton = (Button)findViewById(R.id.codeInsertButton);
+		codeInsertButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				TextView textView = (TextView) findViewById(R.id.input_text);
+				textView.setText(textView.getText() + "``````");
+//				final AlertDialog.Builder codeDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
+//				String[] items;
+//				if (tvManager.hasCode())
+//					items = new String[]{"コードを挿入", "コードを削除"};
+//				else
+//					items = new String[]{"コードを挿入"};
+//				codeDialogBuilder.setItems(items, new DialogInterface.OnClickListener() {
+//					@Override
+//					public void onClick(DialogInterface dialog, int which) {
+//						switch (which) {
+//							case 0: //コード挿入
+//								final AlertDialog.Builder codeInputDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
+//								LinearLayout layout = new LinearLayout(TalkActivity.this);
+//								layout.setOrientation(LinearLayout.VERTICAL);
+//								layout.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.MP));
+//								final EditText codeInput = new EditText(TalkActivity.this);
+//								codeInput.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.WC));
+//								codeInput.setLines(3);
+//								layout.addView(codeInput);
+//								codeInputDialogBuilder.setView(layout);
+//								codeInputDialogBuilder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
+//									@Override
+//									public void onClick(DialogInterface dialog, int which) {
+//										//OK押されたら
+//										tvManager.addCode(codeInput.getText().toString());
+//									}
+//								});
+//								codeInputDialogBuilder.setNegativeButton(R.string.cancel_text, null);
+//								codeInputDialogBuilder.show();
+//								break;
+//							case 1: //コード削除
+//								AlertDialog.Builder codeDeleteDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
+//								String[] items = new String[tvManager.getCodeNum()];
+//								for (int i = 0; i < items.length; i++)
+//									items[i] = Integer.toString(i);
+//								codeDeleteDialogBuilder.setItems(items, new DialogInterface.OnClickListener() {
+//									@Override
+//									public void onClick(DialogInterface dialog, int which) {
+//										AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
+//										confirmDialogBuilder.setMessage("本当に" + which + "番を削除してよろしいですか？");
+//										confirmDialogBuilder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
+//											@Override
+//											public void onClick(DialogInterface dialog, int which) {
+//												tvManager.removeCode(which);
+//											}
+//										});
+//										confirmDialogBuilder.setNegativeButton(R.string.cancel_text, null);
+//										confirmDialogBuilder.show();
+//									}
+//								});
+//								codeDeleteDialogBuilder.show();
+//								break;
+//						}
+//					}
+//				});
+//				codeDialogBuilder.show();
+			}
+		});
+	}
+
 	private final void initSetting() {
 		//プロフィール画像をクリックしたらギャラリーで選択できるようにする
 		ImageView imageView = (ImageView)findViewById(R.id.setting_image);
@@ -981,19 +1073,19 @@ public class TalkActivity extends AppCompatActivity {
 							}
 							userImageFile = null;
 						}
-						Swallow.UserDetail user = (Swallow.UserDetail)tvManager.getMyUserInfo().user;
-						if (userName.equals(user.getUserName()) == false
-						|| profile.equals(user.getProfile()) == false
-								|| twitterText.equals(user.getTwitter()) == false
-								|| mailText1.equals(user.getEmail()) == false
-								|| mailText2.equals(user.getEmail()) == false
-								|| imageID.equals(user.getImage()) == false
+						Swallow.UserDetail user = (Swallow.UserDetail)UserInfoManager.getMyUserInfo().user;
+						if ((userName != null && userName.equals(user.getUserName()) == false)
+								|| (profile != null && profile.equals(user.getProfile()) == false)
+								|| (twitterText != null && twitterText.equals(user.getTwitter())) == false
+								|| (mailText1 != null && mailText1.equals(user.getEmail()) == false)
+								|| (mailText2 != null && mailText2.equals(user.getEmail()) == false)
+								|| (imageID != null && imageID.equals(user.getImage()) == false)
 								|| password != null) {
 							try {
 								//サーバーに変更を送信
-								tvManager.setMyUserInfo(SCM.scm.swallow.modifyUser(
+								SCM.swallow.modifyUser(
 										userName, profile, imageID, password, mailText1 + "@" + mailText2, null, twitterText, null, null,
-										null, null));
+										null, null);
 								tvManager.refreshOnUserInfoChanged_1();
 							} catch (SwallowException e) {
 								e.printStackTrace();
@@ -1010,16 +1102,13 @@ public class TalkActivity extends AppCompatActivity {
 						bgView.enable = bg;
 						//NotifyをPreferenceへ
 						ListView notifyTagList = (ListView) findViewById(R.id.setting_tag_list);
-						StringBuilder sb = new StringBuilder();
-						for (int i = 0; i < tvManager.getVisibleTagNum(); i++) {
+						ArrayList<String> list = new ArrayList<>();
+						for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
 							if (notifyTagList.isItemChecked(i)) {
-								sb.append(tvManager.findVisibleTagByIndex(i).tagID);
-								sb.append(',');
+								list.add(TagInfoManager.findTagByIndex(i, true).tag.getTagName());
 							}
 						}
-						if (sb.length() > 0)
-							sb.deleteCharAt(sb.length()-1);
-						MyUtils.sp.edit().putString(MyUtils.NOTIFY_TAG_KEY, sb.toString()).apply();
+						TagInfoManager.setNotification(list.toArray(new String[0]));
 						return null;
 					}
 
@@ -1027,13 +1116,13 @@ public class TalkActivity extends AppCompatActivity {
 					protected void onPostExecute(String str) {
 						if (str == null) {
 							tvManager.refreshOnUserInfoChanged_2();
-							shiftToTalk();
 						} else {
 							MyUtils.showShortToast(TalkActivity.this, str);
 						}
 					}
 				};
 				task.execute((Void)null);
+				shiftToTalk();
 			}
 		});
 	}
@@ -1083,12 +1172,12 @@ public class TalkActivity extends AppCompatActivity {
 
 	private final void showTagSelectDialog() {
 		//タグリストをStringの配列にする
-		final String[] items = new String[tvManager.getVisibleTagNum()];
+		final String[] items = new String[TagInfoManager.getVisibleTagNum()];
 		for (int i = 0 ; i < items.length; i++)
-			items[i] = tvManager.findVisibleTagByIndex(i).tagName;
+			items[i] = TagInfoManager.findTagByIndex(i, true).tag.getTagName();
 		boolean[] selectionList = new boolean[items.length];
 		for (int i = 0; i < selectionList.length; i++)
-			selectionList[i] = tvManager.findVisibleTagByIndex(i).isSelected;
+			selectionList[i] = TagInfoManager.findTagByIndex(i, true).isSelected();
 		tagSelectDialogBuilder.setMultiChoiceItems(items, selectionList,
 				tagChoiceListener) ;
 		//ダイアログを作成
@@ -1161,7 +1250,11 @@ public class TalkActivity extends AppCompatActivity {
 		//tagSelectButtonを設定
 		{
 			Button tagSelectButton = (Button)findViewById(R.id.tag_select_button);
-			tagSelectButton.setText(tvManager.getSelectedTagText());
+			tagSelectButton.setText(TagInfoManager.getSelectedTagText());
+		}
+		{
+			EditText input = (EditText)findViewById(R.id.input_text);
+			input.setText(((EditText)findViewById(R.id.input_text_dummy)).getText().toString());
 		}
 		//input_viewへ遷移
 		ViewFlipper vf = (ViewFlipper)findViewById(R.id.flipper);
@@ -1179,6 +1272,11 @@ public class TalkActivity extends AppCompatActivity {
 		vf.setInAnimation(talk_in_animation);
 		vf.setOutAnimation(input_out_animation);
 		vf.setDisplayedChild(0);
+
+		{
+			EditText input = (EditText)findViewById(R.id.input_text_dummy);
+			input.setText(((EditText)findViewById(R.id.input_text)).getText().toString());
+		}
 	}
 
 	private final void shiftToSetting() {
@@ -1189,12 +1287,12 @@ public class TalkActivity extends AppCompatActivity {
 
 		//設定画面を初期化
 
-		Swallow.UserDetail myself = (Swallow.UserDetail)tvManager.getMyUserInfo().user;
+		Swallow.UserDetail myself = (Swallow.UserDetail) UserInfoManager.getMyUserInfo().user;
 
 		//プロフィール画像を設定
 		ImageView imageView = (ImageView)findViewById(R.id.setting_image);
-		if (tvManager.getMyUserInfo().user.getImage() != null) {
-			imageView.setImageBitmap(tvManager.getMyUserInfo().profileImage);
+		if (UserInfoManager.getMyUserInfo().user.getImage() != null) {
+			imageView.setImageBitmap(UserInfoManager.getMyUserInfo().profileImage);
 		} else {
 			imageView.setImageResource(R.drawable.person);
 		}
@@ -1230,16 +1328,17 @@ public class TalkActivity extends AppCompatActivity {
 		bgCheck.setChecked(bg);
 		//通知リストを設定
 		ListView notifyTagList = (ListView)findViewById(R.id.setting_tag_list);
-		String[] member = new String[tvManager.getVisibleTagNum()];
+		String[] member = new String[TagInfoManager.getVisibleTagNum()];
 		for (int i = 0; i < member.length; i++)
-			member[i] = tvManager.findVisibleTagByIndex(i).tagName;
+			member[i] = TagInfoManager.findTagByIndex(i, true).tag.getTagName();
 		notifyTagList.setAdapter(new ArrayAdapter<>(TalkActivity.this,
 				android.R.layout.simple_list_item_multiple_choice, member));
 		//通知リストのチェックを設定
-		for (String notifyTagIDStr : MyUtils.sp.getString(MyUtils.NOTIFY_TAG_KEY, null).split(",")) {
+		TagInfoManager.TagInfo[]  notificationTagList = TagInfoManager.getNotification();
+		for (TagInfoManager.TagInfo tagInfo : notificationTagList) {
 			int index = -1;
-			for (int j = 0; j < tvManager.getVisibleTagNum(); j++) {
-				if (notifyTagIDStr.equals(Integer.toString(tvManager.findVisibleTagByIndex(j).tagID))) {
+			for (int j = 0; j < TagInfoManager.getVisibleTagNum(); j++) {
+				if (tagInfo.tag.getTagID() == TagInfoManager.findTagByIndex(j, true).tag.getTagID()) {
 					index = j;
 					break;
 				}
@@ -1265,7 +1364,7 @@ public class TalkActivity extends AppCompatActivity {
 					new ServerTask(this, "削除失敗") {
 						@Override
 						public void doInSubThread() throws SwallowException {
-							SCM.scm.deleteMessage(postId);
+							SCM.deleteMessage(postId);
 						}
 
 						@Override
@@ -1305,35 +1404,43 @@ public class TalkActivity extends AppCompatActivity {
 		//tagSelectListを更新
 		{
 			ListView tagSelectList = (ListView) findViewById(R.id.drawer_tag_select_list);
-			final String[] members = new String[tvManager.getVisibleTagNum()];
+			final String[] members = new String[TagInfoManager.getVisibleTagNum()];
 			{
 				//adapterを生成・設定。
 				for (int i = 0; i < members.length; i++)
-					members[i] = tvManager.findVisibleTagByIndex(i).tagName;
+					members[i] = TagInfoManager.findTagByIndex(i, true).tag.getTagName();
 				ArrayAdapter<String> tagList = new ArrayAdapter<>(TalkActivity.this,
 						android.R.layout.simple_list_item_multiple_choice, members);
 				tagSelectList.setAdapter(tagList);
 			}
 			//tagSelectListに選択状況を適用
 			for (int i = 0; i < members.length; i++) {
-				tagSelectList.setItemChecked(i, tvManager.findVisibleTagByIndex(i).isSelected);
+				tagSelectList.setItemChecked(i, TagInfoManager.findTagByIndex(i, true).isSelected());
 			}
-			//クリック時の動作を設定
-			tagSelectList.setOnItemClickListener(new OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-					//タグの選択状況を反転
-					TagInfo clickedTag = tvManager.findVisibleTagByName(members[position]);
-					clickedTag.isSelected = !clickedTag.isSelected;
-				}
-			});
+		}
+
+	}
+
+	private final void updateUserSelectList() {
+		//userSelectListを更新
+		{
+			ListView userSelectList = (ListView) findViewById(R.id.drawer_user_select_list);
+			final String[] members = new String[UserInfoManager.getUserNum()];
+			{
+				//adapterを生成・設定。
+				for (int i = 0; i < members.length; i++)
+					members[i] = UserInfoManager.findUserByIndex(i).user.getUserName();
+				ArrayAdapter<String> tagList = new ArrayAdapter<>(TalkActivity.this,
+						android.R.layout.simple_list_item_1, members);
+				userSelectList.setAdapter(tagList);
+			}
 		}
 
 	}
 
 	private final void onTagSelectButtonPressed() {
 		Button tagButton = (Button)TalkActivity.this.findViewById(R.id.tag_select_button);
-		tagButton.setText(tvManager.getSelectedTagText());
+		tagButton.setText(TagInfoManager.getSelectedTagText());
 		tagSelectDialog.dismiss(); //alertDialog抹消
 	}
 
@@ -1353,15 +1460,13 @@ public class TalkActivity extends AppCompatActivity {
 	private final void onTagAddDecideButtonPressed() {
 		final String tag = tagAddInput.getText().toString().trim();
 		//何か入力されていて、まだそのタグがなかった場合
-		if (tag.length() != 0 && tvManager.findVisibleTagByName(tag) == null) {
+		if (tag.length() != 0 && TagInfoManager.findTagByName(tag) == null) {
 			//tagListに新たなタグを追加
 			new ServerTask(this, "タグの追加に失敗しました") {
 				@Override
 				public void doInSubThread() throws SwallowException {
-					int tagID = SCM.scm.sendAddTag(tag, false);
-					TagInfo newTag = new TagInfo(tag, tagID);
-					tvManager.addVisibleTag(newTag);
-					newTag.isSelected = true;
+					TagInfoManager.TagInfo t = TagInfoManager.addTag(tag, true);
+					TagInfoManager.selectTag(t);
 				}
 
 				@Override

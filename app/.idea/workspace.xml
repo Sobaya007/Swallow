@@ -40,15 +40,38 @@
     </layouts>
   </component>
   <component name="AndroidLogFilters">
-    <option name="TOOL_WINDOW_LOG_LEVEL" value="INFO" />
+    <option name="TOOL_WINDOW_LOG_LEVEL" value="ERROR" />
+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b067ce26-f656-44fe-ba31-739fa7a552e1" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/TagInfoManager.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/UserInfoManager.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/assets/highlight.pack.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/assets/tomorrow-night.css" />
+      <change type="DELETED" beforePath="C:\Users\sobayaou\OneDrive\Swallow2\Swallow2\app\src\main\java\com\trap\swallow\info\TagInfo.java" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app-release.apk" afterPath="$PROJECT_DIR$/app-release.apk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/src/main/AndroidManifest.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/FileInfo.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/FileInfo.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/login/LogInActivity.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/login/LogInActivity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/swallow/MainActivity.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/swallow/MainActivity.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/RegistrationIntentService.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/RegistrationIntentService.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SCM.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SCM.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/ServerTask.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/ServerTask.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/Swallow.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/Swallow.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java" afterPath="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/res/layout/activity_talk.xml" afterPath="$PROJECT_DIR$/src/main/res/layout/activity_talk.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/res/layout/dialog_user.xml" afterPath="$PROJECT_DIR$/src/main/res/layout/dialog_user.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/res/layout/message_view.xml" afterPath="$PROJECT_DIR$/src/main/res/layout/message_view.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/res/layout/message_view_copy.xml" afterPath="$PROJECT_DIR$/src/main/res/layout/message_view_copy.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/res/layout/view_input.xml" afterPath="$PROJECT_DIR$/src/main/res/layout/view_input.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="app.iws" />
@@ -98,45 +121,14 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="TalkActivity.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="TalkActivity.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="1316" column="30" selection-start-line="1316" selection-start-column="30" selection-end-line="1316" selection-end-column="30" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MessageView.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="146" column="60" selection-start-line="146" selection-start-column="60" selection-end-line="146" selection-end-column="60" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="activity_talk.xml" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/res/layout/activity_talk.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.36394557">
-              <caret line="46" column="45" selection-start-line="46" selection-start-column="45" selection-end-line="46" selection-end-column="45" />
-              <folding />
-            </state>
-          </provider>
-          <provider editor-type-id="android-designer">
-            <state />
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SCM.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SCM.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="100" column="32" selection-start-line="100" selection-start-column="32" selection-end-line="100" selection-end-column="32" />
-              <folding />
+            <state vertical-scroll-proportion="0.42372882">
+              <caret line="192" column="0" selection-start-line="192" selection-start-column="0" selection-end-line="192" selection-end-column="0" />
+              <folding>
+                <element signature="e#17020#17028#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -145,48 +137,18 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="437" column="33" selection-start-line="437" selection-start-column="33" selection-end-line="437" selection-end-column="33" />
+              <caret line="111" column="24" selection-start-line="111" selection-start-column="24" selection-end-line="111" selection-end-column="24" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MyUtils.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java">
+      <file leaf-file-name="SCM.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SCM.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="91" column="42" selection-start-line="91" selection-start-column="42" selection-end-line="91" selection-end-column="42" />
+              <caret line="130" column="5" selection-start-line="118" selection-start-column="4" selection-end-line="130" selection-end-column="5" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="UserInfo.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/info/UserInfo.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="16" column="31" selection-start-line="16" selection-start-column="31" selection-end-line="16" selection-end-column="31" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MyGcmListenerService.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="142" column="24" selection-start-line="142" selection-start-column="24" selection-end-line="142" selection-end-column="24" />
-              <folding>
-                <element signature="imports" expanded="false" />
-                <element signature="e#1453#1454#0" expanded="false" />
-                <element signature="e#1476#1477#0" expanded="false" />
-                <element signature="e#2021#2022#0" expanded="false" />
-                <element signature="e#2062#2063#0" expanded="false" />
-                <element signature="e#2123#2124#0" expanded="false" />
-                <element signature="e#2165#2166#0" expanded="false" />
-                <element signature="e#2238#2239#0" expanded="false" />
-                <element signature="e#2285#2286#0" expanded="false" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -196,9 +158,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="resourceFile" />
         <option value="Class" />
         <option value="layoutResourceFile_vertical" />
-        <option value="resourceFile" />
       </list>
     </option>
   </component>
@@ -1762,39 +1724,43 @@
         <option value="$PROJECT_DIR$/src/main/res/drawable/fav_button_selector.xml" />
         <option value="$PROJECT_DIR$/src/main/res/drawable/code_button_selector.xml" />
         <option value="$PROJECT_DIR$/src/main/res/drawable/received_button_selector.xml" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/RegistrationIntentService.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/swallow/MainActivity.java" />
         <option value="$PROJECT_DIR$/src/main/res/layout/view_setting_tag.xml" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/TagInfo.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SwallowSecurity.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/Swallow.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/FileInfo.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageViewAdapter.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/FileClipView.java" />
-        <option value="$PROJECT_DIR$/src/main/res/layout/message_view_copy.xml" />
-        <option value="$PROJECT_DIR$/src/main/res/layout/message_view.xml" />
         <option value="$PROJECT_DIR$/src/main/res/values/styles.xml" />
         <option value="$PROJECT_DIR$/src/main/res/layout/activity_login.xml" />
-        <option value="$PROJECT_DIR$/src/main/res/layout/dialog_user.xml" />
         <option value="$PROJECT_DIR$/src/main/res/layout/view_talk.xml" />
         <option value="$PROJECT_DIR$/src/main/assets/test_ps.txt" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/BackgroundView.java" />
         <option value="$PROJECT_DIR$/src/main/res/drawable/enquete_selector.xml" />
         <option value="$PROJECT_DIR$/src/main/res/drawable/enquete_normal_selector.xml" />
-        <option value="$PROJECT_DIR$/src/main/res/layout/view_input.xml" />
         <option value="$PROJECT_DIR$/src/main/res/drawable/enquete_selected_selector.xml" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyInstanceIDListenerService.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/login/LogInActivity.java" />
         <option value="$PROJECT_DIR$/src/main/res/layout/view_setting.xml" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/UserInfo.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/Swallow.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/TagInfo.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/FileInfo.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/RegistrationIntentService.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/TagInfoManager.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/ServerTask.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/login/LogInActivity.java" />
+        <option value="$PROJECT_DIR$/src/main/res/layout/dialog_user.xml" />
+        <option value="$PROJECT_DIR$/src/main/res/layout/view_input.xml" />
+        <option value="$PROJECT_DIR$/src/main/res/layout/dialog_code_input.xml" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/swallow/MainActivity.java" />
+        <option value="$PROJECT_DIR$/src/main/res/layout/message_view.xml" />
+        <option value="$PROJECT_DIR$/src/main/res/layout/message_view_copy.xml" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/info/UserInfoManager.java" />
+        <option value="$PROJECT_DIR$/src/main/res/layout/activity_talk.xml" />
         <option value="$PROJECT_DIR$/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SCM.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java" />
-        <option value="$PROJECT_DIR$/src/main/res/layout/activity_talk.xml" />
       </list>
     </option>
   </component>
@@ -1811,8 +1777,8 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1378" />
-    <option name="height" value="744" />
+    <option name="width" value="1320" />
+    <option name="height" value="784" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -1945,67 +1911,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="values" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Swallow2" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="res" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
               <option name="myItemId" value="layout" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Swallow2" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="res" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="drawable" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -2074,6 +1980,10 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="com" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="swallow" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -2597,7 +2507,7 @@
     <property name="OverrideImplement.combined" value="true" />
     <property name="OverrideImplement.overriding.sorted" value="false" />
     <property name="FullScreen" value="false" />
-    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.project.gradle" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="ExportApk.ApkPath" value="C:\Users\sobayaou\OneDrive\Swallow2\Swallow2\app" />
     <property name="ExportApk.Flavors" value="" />
@@ -2605,8 +2515,8 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\sobayaou\OneDrive\Swallow2\Swallow2\app\src\main\res\assets" />
       <recent name="C:\Users\sobayaou\OneDrive\Swallow2\Swallow2\app\src\main\assets" />
+      <recent name="C:\Users\sobayaou\OneDrive\Swallow2\Swallow2\app\src\main\res\assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\sobayaou\OneDrive\Swallow2\Swallow2\app\src\main\res\drawable" />
@@ -2818,35 +2728,35 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1378" height="744" extended-state="1" />
+    <frame x="-8" y="-8" width="1320" height="784" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32852808" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32879046" sideWeight="0.4969651" order="13" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33173844" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4020443" sideWeight="0.4969651" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.40031898" sideWeight="0.4969651" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4020443" sideWeight="0.5273141" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32879046" sideWeight="0.4908953" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4020443" sideWeight="0.5182094" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.560477" sideWeight="0.4491654" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.4020443" sideWeight="0.47268587" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5582137" sideWeight="0.4491654" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3907496" sideWeight="0.47268587" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32879046" sideWeight="0.4969651" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25265554" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20396826" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24355084" sideWeight="0.5" order="4" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32879046" sideWeight="0.4757208" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2642857" sideWeight="0.5" order="4" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32695374" sideWeight="0.4757208" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3339012" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32539684" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -2863,193 +2773,29 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="181" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java</url>
+          <line>2</line>
+          <properties />
+          <option name="timeStamp" value="181" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SCM.java</url>
+          <line>99</line>
+          <properties />
+          <option name="timeStamp" value="211" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="212" />
     </breakpoint-manager>
-    <watches-manager />
+    <watches-manager>
+      <configuration name="app">
+        <watch expression="TalkActivity.singleton" language="JAVA" custom="" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="27" selection-start-line="10" selection-start-column="27" selection-end-line="10" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/local.properties">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33452594">
-          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/drawable/zip.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/drawable/fav_button_selector.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.22591361">
-          <caret line="4" column="42" selection-start-line="4" selection-start-column="42" selection-end-line="4" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/build/intermediates/exploded-aar/com.google.android.gms/play-services-gcm/7.5.0/jars/classes.jar!/com/google/android/gms/gcm/GcmListenerService.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-8.16">
-          <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/activity_main.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.125">
-          <caret line="2" column="39" selection-start-line="2" selection-start-column="39" selection-end-line="2" selection-end-column="39" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/com/android/internal/os/RuntimeInit.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3323077">
-          <caret line="66" column="0" selection-start-line="66" selection-start-column="0" selection-end-line="66" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/android/preference/PreferenceManager.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33123028">
-          <caret line="370" column="0" selection-start-line="370" selection-start-column="0" selection-end-line="370" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/swallow/MainActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="32" column="47" selection-start-line="32" selection-start-column="47" selection-end-line="32" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/android/os/AsyncTask.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3846154">
-          <caret line="287" column="27" selection-start-line="287" selection-start-column="27" selection-end-line="287" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/ServerTask.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.0473186">
-          <caret line="33" column="0" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SwallowTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.11643836">
-          <caret line="2" column="16" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/info/TagInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.16088328">
-          <caret line="3" column="35" selection-start-line="3" selection-start-column="35" selection-end-line="3" selection-end-column="35" />
-          <folding>
-            <element signature="e#354#355#0" expanded="false" />
-            <element signature="e#409#410#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/view_setting_tag.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-4.1034484">
-          <caret line="20" column="11" selection-start-line="20" selection-start-column="11" selection-end-line="20" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/FileClipView.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="23" column="23" selection-start-line="23" selection-start-column="23" selection-end-line="23" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/message_view_copy.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3323442">
-          <caret line="114" column="12" selection-start-line="114" selection-start-column="12" selection-end-line="122" selection-end-column="47" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/info/FileInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="58" column="56" selection-start-line="58" selection-start-column="56" selection-end-line="58" selection-end-column="56" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/activity_login.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-7.4827585">
-          <caret line="24" column="41" selection-start-line="24" selection-start-column="41" selection-end-line="24" selection-end-column="41" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageViewAdapter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="36" column="43" selection-start-line="36" selection-start-column="43" selection-end-line="36" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/dialog_user.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.50680274">
-          <caret line="57" column="51" selection-start-line="57" selection-start-column="51" selection-end-line="57" selection-end-column="51" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/dialog_tag_add.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/assets/test_ps.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.51699466">
-          <caret line="17" column="29" selection-start-line="17" selection-start-column="29" selection-end-line="17" selection-end-column="87" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/BackgroundView.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3452594">
-          <caret line="507" column="28" selection-start-line="507" selection-start-column="28" selection-end-line="507" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/res/drawable/code_button_selector.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -3058,13 +2804,13 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/res/drawable/reply_button_selector.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.24329159">
           <caret line="8" column="39" selection-start-line="8" selection-start-column="39" selection-end-line="8" selection-end-column="39" />
         </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/res/drawable/received_button_selector.xml">
@@ -3074,16 +2820,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/message_view.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="124" column="16" selection-start-line="124" selection-start-column="16" selection-end-line="124" selection-end-column="16" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/res/drawable/enquete_normal_selector.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -3091,35 +2827,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/view_input.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="95" column="0" selection-start-line="95" selection-start-column="0" selection-end-line="95" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/res/drawable/enquete_selected_selector.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="5" column="19" selection-start-line="5" selection-start-column="19" selection-end-line="5" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/RegistrationIntentService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.10526316">
-          <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -3137,13 +2848,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SwallowImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.1764706">
-          <caret line="214" column="33" selection-start-line="214" selection-start-column="33" selection-end-line="214" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
     <entry file="android-dummy://app/app/Translations Editor">
       <provider selected="true" editor-type-id="string-resource-editor">
         <state />
@@ -3157,93 +2861,307 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/res/layout/view_setting.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.4489796">
           <caret line="37" column="35" selection-start-line="37" selection-start-column="35" selection-end-line="37" selection-end-column="35" />
-          <folding>
-            <element signature="e#1369#1396#0" expanded="true" />
-          </folding>
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/res/layout/view_talk.xml">
       <provider editor-type-id="android-designer">
         <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.3469388">
+          <caret line="63" column="27" selection-start-line="63" selection-start-column="27" selection-end-line="63" selection-end-column="27" />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/Swallow.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="181" column="31" selection-start-line="181" selection-start-column="31" selection-end-line="181" selection-end-column="31" />
+          <caret line="341" column="7" selection-start-line="341" selection-start-column="7" selection-end-line="341" selection-end-column="7" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/login/LogInActivity.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/LineView.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.84210527">
-          <caret line="43" column="9" selection-start-line="32" selection-start-column="8" selection-end-line="43" selection-end-column="9" />
+        <state vertical-scroll-proportion="0.20807454">
+          <caret line="6" column="13" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyInstanceIDListenerService.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/RequestJsonWriter.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60681117">
-          <caret line="27" column="42" selection-start-line="27" selection-start-column="42" selection-end-line="27" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="38" selection-start-line="14" selection-start-column="38" selection-end-line="14" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="91" column="42" selection-start-line="91" selection-start-column="42" selection-end-line="91" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="142" column="24" selection-start-line="142" selection-start-column="24" selection-end-line="142" selection-end-column="24" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#1453#1454#0" expanded="false" />
-            <element signature="e#1476#1477#0" expanded="false" />
-            <element signature="e#2021#2022#0" expanded="false" />
-            <element signature="e#2062#2063#0" expanded="false" />
-            <element signature="e#2123#2124#0" expanded="false" />
-            <element signature="e#2165#2166#0" expanded="false" />
-            <element signature="e#2238#2239#0" expanded="false" />
-            <element signature="e#2285#2286#0" expanded="false" />
-          </folding>
+        <state vertical-scroll-proportion="0.21118012">
+          <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/info/UserInfo.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="16" column="31" selection-start-line="16" selection-start-column="31" selection-end-line="16" selection-end-column="31" />
+          <caret line="18" column="40" selection-start-line="18" selection-start-column="40" selection-end-line="18" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/info/FileInfo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="59" column="18" selection-start-line="59" selection-start-column="18" selection-end-line="59" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SwallowImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="89" column="57" selection-start-line="89" selection-start-column="57" selection-end-line="89" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/info/TagInfoManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="176" column="53" selection-start-line="176" selection-start-column="53" selection-end-line="176" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/login/LogInActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5758514">
+          <caret line="72" column="48" selection-start-line="72" selection-start-column="48" selection-end-line="72" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/res/layout/dialog_user.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.15986395">
+          <caret line="7" column="41" selection-start-line="7" selection-start-column="41" selection-end-line="7" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/FileClipView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="61" column="1" selection-start-line="61" selection-start-column="1" selection-end-line="61" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/assets/highlight.pack.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageViewAdapter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="36" column="43" selection-start-line="36" selection-start-column="43" selection-end-line="36" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/com/android/internal/os/RuntimeInit.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.43103448">
+          <caret line="68" column="36" selection-start-line="68" selection-start-column="36" selection-end-line="68" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/android/os/AsyncTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="232" column="0" selection-start-line="232" selection-start-column="0" selection-end-line="232" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/android/webkit/WebView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="62" column="9" selection-start-line="62" selection-start-column="9" selection-end-line="62" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/com/android/layoutlib/bridge/MockView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="37" column="12" selection-start-line="37" selection-start-column="12" selection-end-line="37" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/com/android/webview/chromium/WebViewChromiumFactoryProvider.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.67142856">
+          <caret line="188" column="50" selection-start-line="188" selection-start-column="50" selection-end-line="188" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/android/os/Looper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.38">
+          <caret line="160" column="29" selection-start-line="160" selection-start-column="29" selection-end-line="160" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/java/lang/ThreadLocal.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.17428571">
+          <caret line="53" column="28" selection-start-line="53" selection-start-column="28" selection-end-line="53" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/android/widget/TextView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="641" column="29" selection-start-line="641" selection-start-column="29" selection-end-line="641" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AndroidSDK/sources/android-22/android/os/Handler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.28285715">
+          <caret line="135" column="22" selection-start-line="135" selection-start-column="22" selection-end-line="135" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/ServerTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33142856">
+          <caret line="20" column="0" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/swallow/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="27" column="13" selection-start-line="27" selection-start-column="13" selection-end-line="27" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/assets/test.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4751553">
+          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/BackgroundView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.43965518">
+          <caret line="766" column="46" selection-start-line="766" selection-start-column="46" selection-end-line="766" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/res/layout/message_view_copy.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.0">
+          <caret line="28" column="33" selection-start-line="28" selection-start-column="33" selection-end-line="28" selection-end-column="33" />
+          <folding>
+            <element signature="e#1544#1588#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/res/layout/message_view.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.38557994">
+          <caret line="65" column="39" selection-start-line="65" selection-start-column="39" selection-end-line="65" selection-end-column="39" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java">
+    <entry file="file://$PROJECT_DIR$/src/main/res/layout/view_input.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="437" column="33" selection-start-line="437" selection-start-column="33" selection-end-line="437" selection-end-column="33" />
+        <state vertical-scroll-proportion="-0.0">
+          <caret line="110" column="21" selection-start-line="110" selection-start-column="21" selection-end-line="110" selection-end-column="21" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SCM.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/info/UserInfoManager.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="100" column="32" selection-start-line="100" selection-start-column="32" selection-end-line="100" selection-end-column="32" />
+        <state vertical-scroll-proportion="0.759887">
+          <caret line="41" column="40" selection-start-line="41" selection-start-column="40" selection-end-line="41" selection-end-column="40" />
+          <folding>
+            <element signature="e#1407#1408#0" expanded="true" />
+            <element signature="e#1449#1450#0" expanded="true" />
+            <element signature="e#1506#1507#0" expanded="true" />
+            <element signature="e#1552#1553#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/res/layout/activity_talk.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5415385">
+          <caret line="48" column="39" selection-start-line="48" selection-start-column="39" selection-end-line="48" selection-end-column="39" />
+          <folding>
+            <element signature="e#1158#1187#0" expanded="false" />
+            <element signature="e#1405#1437#0" expanded="false" />
+            <element signature="e#2487#2519#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/RegistrationIntentService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.04347826">
+          <caret line="57" column="58" selection-start-line="57" selection-start-column="58" selection-end-line="57" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyInstanceIDListenerService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.04347826">
+          <caret line="13" column="27" selection-start-line="13" selection-start-column="27" selection-end-line="13" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.050847456">
+          <caret line="3" column="27" selection-start-line="3" selection-start-column="27" selection-end-line="3" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MyUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.65217394">
+          <caret line="165" column="5" selection-start-line="165" selection-start-column="5" selection-end-line="165" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/gcm/MyGcmListenerService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.3478261">
+          <caret line="156" column="69" selection-start-line="156" selection-start-column="69" selection-end-line="156" selection-end-column="69" />
           <folding />
         </state>
       </provider>
@@ -3251,39 +3169,35 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/MessageView.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="146" column="60" selection-start-line="146" selection-start-column="60" selection-end-line="146" selection-end-column="60" />
+          <caret line="605" column="23" selection-start-line="605" selection-start-column="23" selection-end-line="605" selection-end-column="23" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/view_talk.xml">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/server/SCM.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3469388">
-          <caret line="63" column="27" selection-start-line="63" selection-start-column="27" selection-end-line="63" selection-end-column="27" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="130" column="5" selection-start-line="118" selection-start-column="4" selection-end-line="130" selection-end-column="5" />
           <folding />
         </state>
       </provider>
-      <provider editor-type-id="android-designer">
-        <state />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="111" column="24" selection-start-line="111" selection-start-column="24" selection-end-line="111" selection-end-column="24" />
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/trap/swallow/talk/TalkActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="1316" column="30" selection-start-line="1316" selection-start-column="30" selection-end-line="1316" selection-end-column="30" />
-          <folding />
+        <state vertical-scroll-proportion="0.42372882">
+          <caret line="192" column="0" selection-start-line="192" selection-start-column="0" selection-end-line="192" selection-end-column="0" />
+          <folding>
+            <element signature="e#17020#17028#0" expanded="true" />
+          </folding>
         </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/res/layout/activity_talk.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.36394557">
-          <caret line="46" column="45" selection-start-line="46" selection-start-column="45" selection-end-line="46" selection-end-column="45" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
       </provider>
     </entry>
   </component>

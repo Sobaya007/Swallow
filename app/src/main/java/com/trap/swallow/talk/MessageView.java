@@ -1,5 +1,6 @@
 package com.trap.swallow.talk;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.text.Html;
@@ -25,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
@@ -35,8 +38,9 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.trap.swallow.info.TagInfo;
+import com.trap.swallow.info.TagInfoManager;
 import com.trap.swallow.info.UserInfo;
+import com.trap.swallow.info.UserInfoManager;
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.ServerTask;
 import com.trap.swallow.server.Swallow;
@@ -55,12 +59,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MessageView extends LinearLayout{
 
     private static final int[] tagColors = {
             Color.rgb(230, 0, 18), Color.rgb(0, 160, 233), Color.rgb(0, 153, 68), Color.rgb(14, 110, 184), Color.rgb(96,25, 134)
     };
+
+    public static final String MESSAGE_SEPARATOR = "```";
 
     public LayoutParams lp;
     public Message mInfo;
@@ -72,28 +80,25 @@ public class MessageView extends LinearLayout{
     private AlertDialog enqueteDialog;
     private AlertDialog answerDialog;
 
-    public MessageView(final TalkActivity context, final Message mInfo, final TalkManager tvManager) {
-        super(context);
+    private int favCount;
+
+    private String[] strings;
+    private View v;
+
+    public MessageView(final Message mInfo) {
+        super(TalkActivity.singleton);
+
+        final TalkActivity context = TalkActivity.singleton;
+        final TalkManager tvManager = context.tvManager;
 
         this.mInfo = mInfo;
 
-        boolean isYojo = false;
-        int yojoTagID = tvManager.findInVisibleTagByName("yojo").tagID;
-        for (int tagID : mInfo.getTagID()) {
-            if (yojoTagID == tagID) {
-                isYojo = true;
-                break;
-            }
-        }
-
-        View v = context.getLayoutInflater().inflate(R.layout.message_view, this);
+        this.v = context.getLayoutInflater().inflate(R.layout.message_view, this);
 
         //メッセージ
         {
-            TextView messageView = (TextView)v.findViewById(R.id.message_text);
-            messageView.setText(mInfo.getMessage());
-            if (isYojo)
-                messageView.setTypeface(MyUtils.yojoFont);
+            LinearLayout layout = (LinearLayout)v.findViewById(R.id.message_layout);
+            strings = mInfo.getMessage().split(MESSAGE_SEPARATOR);
         }
 
         //リプ
@@ -106,13 +111,13 @@ public class MessageView extends LinearLayout{
                     StringBuilder sb = new StringBuilder();
                     Message message = null;
                     try {
-                        message = SCM.scm.swallow.findMessage(null, null, null, null, new Integer[]{postId}, null, null, null, null, null, null, null, null)[0];
+                        message = SCM.swallow.findMessage(null, null, null, null, new Integer[]{postId}, null, null, null, null, null, null, null, null)[0];
                     } catch (SwallowException e) {
                         e.printStackTrace();
                     }
                     if (message != null) {
                         sb.append(">>");
-                        sb.append(tvManager.findUserById(message.getUserID()).user.getUserName());
+                        sb.append(UserInfoManager.findUserByID(message.getUserID()).user.getUserName());
                         c.setTimeInMillis(message.getPosted());
                         int h = c.get(Calendar.HOUR_OF_DAY);
                         int m = c.get(Calendar.MINUTE);
@@ -156,7 +161,7 @@ public class MessageView extends LinearLayout{
             }
         }
 
-        final  UserInfo sender = tvManager.findUserById(mInfo.getUserID());
+        final  UserInfo sender = UserInfoManager.findUserByID(mInfo.getUserID());
         //アイコン
         {
             ImageView iconView = (ImageView)v.findViewById(R.id.icon_image);
@@ -167,9 +172,9 @@ public class MessageView extends LinearLayout{
                     LinearLayout l = new LinearLayout(context);
                     l.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.MP));
                     context.getLayoutInflater().inflate(R.layout.dialog_user, l);
-                    TextView userName = (TextView)l.findViewById(R.id.user_name);
-                    TextView profile = (TextView)l.findViewById(R.id.user_profile);
-                    ImageView imageView = (ImageView)l.findViewById(R.id.user_image);
+                    TextView userName = (TextView) l.findViewById(R.id.user_name);
+                    TextView profile = (TextView) l.findViewById(R.id.user_profile);
+                    ImageView imageView = (ImageView) l.findViewById(R.id.user_image);
                     userName.setText(sender.user.getUserName());
                     profile.setText(sender.user.getProfile());
                     imageView.setImageBitmap(sender.profileImage);
@@ -242,13 +247,13 @@ public class MessageView extends LinearLayout{
                     layout.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            final  String fileType = file.getFileType();
+                            final String fileType = file.getFileType();
                             final Intent intent = new Intent();
                             intent.setType(fileType);
                             new ServerTask(context, "ファイル読み込みエラー") {
                                 @Override
                                 public void doInSubThread() throws SwallowException {
-                                    if(fileType.equals("application/pdf"))
+                                    if (fileType.equals("application/pdf"))
 
                                     {
                                         intent.setAction(Intent.ACTION_VIEW);
@@ -267,18 +272,14 @@ public class MessageView extends LinearLayout{
                                         String path = "file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + file.getFileName();
                                         intent.setDataAndType(Uri.parse(path), "application/pdf");
                                         context.startActivity(intent);
-                                    }
-
-                                    else if(fileType.equals("text/plain"))
+                                    } else if (fileType.equals("text/plain"))
 
                                     {
                                         intent.setAction(Intent.ACTION_SEND);
                                         String text = new String(MyUtils.getFileByteArray(file.getFileID()));
                                         intent.putExtra(Intent.EXTRA_TEXT, text);
                                         context.startActivity(intent);
-                                    }
-
-                                    else if(fileType.startsWith("image"))
+                                    } else if (fileType.startsWith("image"))
 
                                     {
                                         intent.setAction(Intent.ACTION_VIEW);
@@ -384,7 +385,7 @@ public class MessageView extends LinearLayout{
                                 new ServerTask(context, "アンケート回答失敗です") {
                                     @Override
                                     public void doInSubThread() throws SwallowException {
-                                        SCM.scm.swallow.createAnswer(mInfo.getPostID(), answerIndex);
+                                        SCM.swallow.createAnswer(mInfo.getPostID(), answerIndex);
                                         SharedPreferences.Editor editor = MyUtils.sp.edit();
                                         editor.putBoolean("A" + mInfo.getPostID(), true);
                                         editor.apply();
@@ -408,8 +409,10 @@ public class MessageView extends LinearLayout{
                     enqueteLayout.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+                            progressDialog.show();
                             //その投稿が自分のものかどうか
-                            if (mInfo.getUserID() == tvManager.getMyUserInfo().user.getUserID()) {
+                            if (mInfo.getUserID() == UserInfoManager.getMyUserInfo().user.getUserID()) {
                                 //自分のものであったなら
                                 final ArrayList[] answers = new ArrayList[enqeteList.length];
                                 for (int i = 0; i < answers.length; i++)
@@ -418,7 +421,7 @@ public class MessageView extends LinearLayout{
                                     @Override
                                     public void doInSubThread() throws SwallowException {
                                         //回答者名を回答ごとに仕分け
-                                        Message m = SCM.scm.swallow.findMessage(null, null, null, null, new Integer[]{mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
+                                        Message m = SCM.swallow.findMessage(null, null, null, null, new Integer[]{mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
                                         for (Swallow.Answer a : m.getAnswer()) {
                                             answers[a.getAnswer()].add(a.getUserID());
                                         }
@@ -438,6 +441,7 @@ public class MessageView extends LinearLayout{
                                             answerDialogBuilder.setView(listView);
                                             answerDialog = answerDialogBuilder.create();
                                             answerDialog.show();
+                                            progressDialog.dismiss();
                                         }
                                     }
                                 };
@@ -451,6 +455,7 @@ public class MessageView extends LinearLayout{
                                     if (enqueteDialog == null)
                                         enqueteDialog = enqueteDialogBuilder.create();
                                     enqueteDialog.show();
+                                    progressDialog.dismiss();
                                 }
                             }
                         }
@@ -461,7 +466,7 @@ public class MessageView extends LinearLayout{
         //ふぁぼ
         {
             final TextView favNumView = (TextView)v.findViewById(R.id.fav_num_text);
-            favNumView.setText(String.valueOf(mInfo.getFavCount()));
+            favNumView.setText(String.valueOf(favCount = mInfo.getFavCount()));
 
             ImageButton favButton = (ImageButton)v.findViewById(R.id.fav_button);
             favButton.setOnClickListener(new OnClickListener() {
@@ -470,11 +475,11 @@ public class MessageView extends LinearLayout{
                     new ServerTask(context, "ふぁぼに失敗しました") {
                         @Override
                         public void doInSubThread() throws SwallowException {
-                            SCM.scm.swallow.createFavorite(MessageView.this.mInfo.getPostID(), 1);
-                            MessageView.this.mInfo = SCM.scm.swallow.findMessage(null, null, null, null, new Integer[]{MessageView.this.mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
+                            SCM.swallow.createFavorite(MessageView.this.mInfo.getPostID(), 1);
+                            MessageView.this.mInfo = SCM.swallow.findMessage(null, null, null, null, new Integer[]{MessageView.this.mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
                         }
                     };
-                    favNumView.setText(String.valueOf(MessageView.this.mInfo.getFavCount()));
+                    favNumView.setText(String.valueOf(++favCount));
                 }
             });
         }
@@ -485,9 +490,9 @@ public class MessageView extends LinearLayout{
             Integer[] tagIdArray = mInfo.getTagID();
             if (tagIdArray != null) {
                 for (int i = 0; i < tagIdArray.length; i++) {
-                    TagInfo tag = tvManager.findVisibleTagById(tagIdArray[i]);
-                    if (tag != null) {
-                        String tagName = tag.tagName;
+                    TagInfoManager.TagInfo tag = TagInfoManager.findTagByID(tagIdArray[i]);
+                    if (tag != null && !tag.tag.getInvisible()) {
+                        String tagName = tag.tag.getTagName();
                         TextView textView = new TextView(context);
                         textView.setText(tagName);
                         textView.setTextColor(tagColors[i % tagColors.length]);
@@ -503,9 +508,9 @@ public class MessageView extends LinearLayout{
         {
             boolean flag = false;
             for (int tagID : mInfo.getTagID()) {
-                TagInfo tag = tvManager.findInvisibleTagById(tagID);
+                TagInfoManager.TagInfo tag = TagInfoManager.findTagByID(tagID);
                 if (tag != null) {
-                    if (tag.tagName.equals("confirmation")){
+                    if (tag.tag.getTagName().equals("confirmation")){
                         flag = true;
                         break;
                     }
@@ -520,7 +525,7 @@ public class MessageView extends LinearLayout{
                         new ServerTask(context, "既読の取得に失敗しました") {
                             @Override
                             public void doInSubThread() throws SwallowException {
-                                MessageView.this.mInfo = SCM.scm.swallow.findMessage(null, null, null, null, new Integer[]{mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
+                                MessageView.this.mInfo = SCM.swallow.findMessage(null, null, null, null, new Integer[]{mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
                             }
 
                             @Override
@@ -532,7 +537,7 @@ public class MessageView extends LinearLayout{
                                         layout.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.WC));
                                         layout.setOrientation(LinearLayout.HORIZONTAL);
                                         for (Swallow.Received received : mInfo.getReceived()) {
-                                            UserInfo user = context.tvManager.findUserById(received.getUserID());
+                                            UserInfo user = UserInfoManager.findUserByID(received.getUserID());
                                             ImageView iv = new ImageView(context);
                                             iv.setLayoutParams(MyUtils.getLayoutparams(100, 100));
                                             if (user.user.getImage() != null) {
@@ -598,9 +603,39 @@ public class MessageView extends LinearLayout{
         lp.setMargins(20, 20, 30, 0);
     }
 
+    public final void initOnMainThread() {
+        //コード
+        LinearLayout messageLayout = (LinearLayout)v.findViewById(R.id.message_layout);
+        for (int i = 0; i < strings.length; i++) {
+            if (i % 2 == 0) messageLayout.addView(createMessageView(strings[i]));
+            else            messageLayout.addView(createWebView(strings[i]));
+        }
+    }
+
+    private final TextView createMessageView(String message) {
+        TextView textView = new TextView(TalkActivity.singleton);
+        textView.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.WC));
+        textView.setTextColor(Color.BLACK);
+        textView.setTextSize(12);
+        textView.setText(message);
+        int yojoTagID = TagInfoManager.findTagByName("yojo").tag.getTagID();
+        for (int tagID : mInfo.getTagID()) {
+            if (yojoTagID == tagID) {
+                textView.setTypeface(MyUtils.yojoFont);
+                break;
+            }
+        }
+        return textView;
+    }
+
+    private final WebView createWebView(String code) {
+        CodeView codeView = new CodeView(TalkActivity.singleton, code);
+        return codeView;
+    }
+
     public final void refleshOnUserInfoChanged() {
         boolean isYojo = false;
-        int yojoTagID = TalkActivity.singleton.tvManager.findInVisibleTagByName("yojo").tagID;
+        int yojoTagID = TagInfoManager.findTagByName("yojo").tag.getTagID();
         for (int tagID : mInfo.getTagID()) {
             if (yojoTagID == tagID) {
                 isYojo = true;
@@ -608,7 +643,7 @@ public class MessageView extends LinearLayout{
             }
         }
         View v = this.getChildAt(0);
-        final  UserInfo sender = TalkActivity.singleton.tvManager.findUserById(mInfo.getUserID());
+        final  UserInfo sender = UserInfoManager.findUserByID(mInfo.getUserID());
         //アイコン
         {
             ImageView iconView = (ImageView)v.findViewById(R.id.icon_image);
@@ -678,7 +713,7 @@ public class MessageView extends LinearLayout{
             layout.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.WC));
             layout.setOrientation(LinearLayout.HORIZONTAL);
             for (int ID : answerPersonID) {
-                UserInfo user = context.tvManager.findUserById(ID);
+                UserInfo user = UserInfoManager.findUserByID(ID);
                 ImageView iv = new ImageView(context);
                 iv.setLayoutParams(MyUtils.getLayoutparams(100, 100));
                 if (user.user.getImage() != null) {
@@ -728,6 +763,39 @@ public class MessageView extends LinearLayout{
                 paint.getTextBounds(str, 0, str.length(), bounds);
                 canvas.drawText(str, (getWidth() - bounds.width()) / 2, getHeight() * 0.6f - fm.top, paint);
             }
+        }
+    }
+
+    private final class CodeView extends WebView {
+
+        private final AlertDialog dialog;
+
+        public CodeView(Context context, String code) {
+            super(context);
+            setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.WC));
+            getSettings().setJavaScriptEnabled(true);
+            String html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/><link rel=\"stylesheet\" href=\"./tomorrow-night.css\"/><script src=\"./highlight.pack.js\"></script><script>hljs.initHighlightingOnLoad()</script></head><body><font size=\"1\"><pre><code>";
+            html += code;
+            html += "</code></pre></font></body></html>";
+            loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", null);
+            WebView clone = new WebView(TalkActivity.singleton);
+            clone.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.WC));
+            clone.getSettings().setJavaScriptEnabled(true);
+            html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/><link rel=\"stylesheet\" href=\"./tomorrow-night.css\"/><script src=\"./highlight.pack.js\"></script><script>hljs.initHighlightingOnLoad()</script></head><body><font size=\"2\"><pre><code>";
+            html += code;
+            html += "</code></pre></font></body></html>";
+            clone.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", null);
+            AlertDialog.Builder builder = new AlertDialog.Builder(TalkActivity.singleton);
+            builder.setView(clone);
+            this.dialog = builder.create();
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                dialog.show();
+            }
+            return super.onTouchEvent(event);
         }
     }
 }

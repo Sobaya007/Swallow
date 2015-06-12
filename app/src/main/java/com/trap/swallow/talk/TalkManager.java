@@ -19,8 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.trap.swallow.info.FileInfo;
-import com.trap.swallow.info.TagInfo;
+import com.trap.swallow.info.TagInfoManager;
 import com.trap.swallow.info.UserInfo;
+import com.trap.swallow.info.UserInfoManager;
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.Swallow;
 import com.trap.swallow.server.Swallow.File;
@@ -44,18 +45,14 @@ public class TalkManager {
 
 
 	private FileClipView clipView;
-
-	private final ArrayList<UserInfo> userInfoList = new ArrayList<>();
-	private final ArrayList<TagInfo> visibleTagList = new ArrayList<>();
-	private final ArrayList<TagInfo> invisibleTagList = new ArrayList<>();
 	private final List<MessageView> messageList = Collections.synchronizedList(new ArrayList<MessageView>());
 	private final TalkActivity context;
 	private final ViewGroup parent;
-	private UserInfo myUserInfo;
 	private int editingPostId = -1; //編集中の投稿のID
 	private int replyPostId = -1; //リプライ用の一時保存変数
 	private ArrayList<FileInfo> postFileData = new ArrayList<>();
 	private ArrayList<String> enqueteList = new ArrayList<>(); //現在の投稿のアンケート
+	private ArrayList<String> codeList = new ArrayList<>(); //現在の投稿の挿入するソース
 
 	public TalkManager(TalkActivity context, ViewGroup parent) {
 		this.context = context;
@@ -65,70 +62,12 @@ public class TalkManager {
 
 	public final void init() throws SwallowException, IOException, ClassNotFoundException {
 
-		//userInfoListの読み込み
-		SCM.scm.loadUserInfo(userInfoList);
+		UserInfoManager.reload();
 
-		//tagListの読み込み
-		SCM.scm.loadTagList(visibleTagList, invisibleTagList);
-
-		//タグが１つもなかったら、generalというタグを作成する
-		if (visibleTagList.size() == 0) {
-			//タグ作成
-			String initialTagName = "general";
-			int tagID = SCM.scm.sendAddTag(initialTagName, false);
-			TagInfo tagInfo = new TagInfo(initialTagName, tagID);
-			visibleTagList.add(tagInfo);
-			//選択
-			tagInfo.isSelected = true;
-		}
-		//幼女タグがなかったら作成
-		{
-			String yojoTagName = "yojo";
-			if (findInVisibleTagByName(yojoTagName) == null) {
-				//タグ作成
-				int tagID = SCM.scm.sendAddTag(yojoTagName, true);
-				TagInfo tagInfo = new TagInfo(yojoTagName, tagID);
-				invisibleTagList.add(tagInfo);
-			}
-		}
-
-		//初期状態でのタグ選択状況を設定
-		{
-			String value = MyUtils.sp.getString(MyUtils.SELECTED_TAG_KEY, null);
-			if (value != null && value.length() > 0) {
-				//Preferenceに選択されているタグのデータがあったら利用
-				// ","で切る
-				for (String str : value.split(",")) {
-					TagInfo t = findVisibleTagById(Integer.parseInt(str));
-					if (t != null) {
-						t.isSelected = true;
-					}
-				}
-			}  else {
-				//Prefereneにタグ選択に関するデータがない場合、作っておく
-				MyUtils.sp.edit().putString(MyUtils.SELECTED_TAG_KEY,
-						getSelectedTagIDText()).apply();
-			}
-		}
-		//初期状態でのタグ通知情報を設定
-		{
-			//Preferenceに通知情報がなかったら、作っておく
-			if (MyUtils.sp.getString(MyUtils.NOTIFY_TAG_KEY, null) == null) {
-				//とりあえず普通に選択しているものを通知にも登録
-				MyUtils.sp.edit().putString(MyUtils.NOTIFY_TAG_KEY, getSelectedTagIDText()).apply();
-			}
-		}
-
-		//自分のユーザーIDを取得
-		myUserInfo = new UserInfo(SCM.scm.swallow.modifyUser(null, null, null, null, null, null, null, null, null, null, null));
-
-		//自分のユーザーIDをPreferrenceへ
-		{
-			MyUtils.sp.edit().putInt(MyUtils.MY_USER_ID_KEY, myUserInfo.user.getUserID()).apply();
-		}
+		TagInfoManager.reload();
 
 		//messageListの読み込み
-		SCM.scm.initMessageList(messageList, getSelectedTagIDList(), context, this);
+		SCM.initMessageList(messageList);
 
 	}
 
@@ -160,41 +99,14 @@ public class TalkManager {
 
 	public final ArrayList<MessageView> loadPreviousMessage() {
 
-		//userInfoListの読み込み
-		try {
-			SCM.scm.loadUserInfo(userInfoList);
-		} catch (SwallowException e) {
-			e.printStackTrace();
-			return null;
-		}
+		if (!UserInfoManager.reload()) return null;
 
-		//選択されているタグを一時的に保存
-		ArrayList<Integer> selectedTagIDList = new ArrayList<>();
-		for (int i = 0; i < getVisibleTagNum(); i++) {
-			TagInfo t = findVisibleTagByIndex(i);
-			if (t.isSelected)
-				selectedTagIDList.add(t.tagID);
-		}
-
-		//tagListの読み込み
-		try {
-			SCM.scm.loadTagList(visibleTagList, invisibleTagList);
-		} catch (SwallowException e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		//現在のタグ選択状況を復元
-		for (int i = 0; i < selectedTagIDList.size(); i++) {
-			TagInfo t = findVisibleTagById(selectedTagIDList.get(i));
-			if (t != null)
-				t.isSelected = true;
-		}
+		if (!TagInfoManager.reload()) return null;
 
 		ArrayList<MessageView> newMessageList = new ArrayList<>();
 		//newMessageListの読み込み
 		try {
-			SCM.scm.loadOlderMessageToList(newMessageList, getSelectedTagIDList(), context, this);
+			SCM.loadOlderMessageToList(newMessageList);
 		} catch (SwallowException e) {
 			e.printStackTrace();
 			return null;
@@ -209,79 +121,39 @@ public class TalkManager {
 		return newMessageList;
 	}
 
-	public final ArrayList<MessageView> loadNextMessage() throws SwallowException {
+	public final ArrayList<MessageView> loadNextMessage() {
 
-		//userInfoListの読み込み
-		SCM.scm.loadUserInfo(userInfoList);
+		if (!UserInfoManager.reload()) return null;
 
-		//選択されているタグを一時的に保存
-		ArrayList<Integer> selectedTagIDList = new ArrayList<>();
-		for (int i = 0; i < getVisibleTagNum(); i++) {
-			TagInfo t = findVisibleTagByIndex(i);
-			if (t.isSelected)
-				selectedTagIDList.add(t.tagID);
-		}
-
-		//tagListの読み込み
-		SCM.scm.loadTagList(visibleTagList, invisibleTagList);
-
-		//現在のタグ選択状況を復元
-		for (int i = 0; i < selectedTagIDList.size(); i++) {
-			TagInfo t = findVisibleTagById(selectedTagIDList.get(i));
-			if (t != null)
-				t.isSelected = true;
-		}
+		if (!TagInfoManager.reload()) return null;
 
 		ArrayList<MessageView> newMessageList = new ArrayList<>();
-		//newMessageListの読み込み
-		SCM.scm.loadNewMessagesToList(newMessageList, getSelectedTagIDList(), context, this);
+		try {
+			SCM.loadNewMessagesToList(newMessageList);
+		} catch (SwallowException e) {
+			e.printStackTrace();
+			return null;
+		}
 
 		for (int i = 0; i < newMessageList.size(); i++) {
 			MessageView mv = newMessageList.get(i);
 			Animation anim = createAnimationOnReflesh(i);
 			mv.anim = anim;
-			messageList.add(i,mv);
+			messageList.add(i, mv);
 		}
 		return newMessageList;
 	}
 
 	public final ArrayList<MessageView> loadPreviousMessageUntil(long until) {
 
-		//userInfoListの読み込み
-		try {
-			SCM.scm.loadUserInfo(userInfoList);
-		} catch (SwallowException e) {
-			e.printStackTrace();
-			return null;
-		}
+		if (!UserInfoManager.reload()) return null;
 
-		//選択されているタグを一時的に保存
-		ArrayList<Integer> selectedTagIDList = new ArrayList<>();
-		for (int i = 0; i < getVisibleTagNum(); i++) {
-			TagInfo t = findVisibleTagByIndex(i);
-			if (t.isSelected)
-				selectedTagIDList.add(t.tagID);
-		}
-
-		//tagListの読み込み
-		try {
-			SCM.scm.loadTagList(visibleTagList, invisibleTagList);
-		} catch (SwallowException e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		//現在のタグ選択状況を復元
-		for (int i = 0; i < selectedTagIDList.size(); i++) {
-			TagInfo t = findVisibleTagById(selectedTagIDList.get(i));
-			if (t != null)
-				t.isSelected = true;
-		}
+		if (!TagInfoManager.reload()) return null;
 
 		ArrayList<MessageView> newMessageList = new ArrayList<>();
 		//newMessageListの読み込み
 		try {
-			SCM.scm.loadOlderMessageToListUntil(newMessageList, getSelectedTagIDList(), context, this, until);
+			SCM.loadOlderMessageToListUntil(newMessageList, until);
 		} catch (SwallowException e) {
 			e.printStackTrace();
 			return null;
@@ -296,32 +168,11 @@ public class TalkManager {
 		return newMessageList;
 	}
 
-	public final ArrayList<MessageView> refreshOnTagSelectChanged() throws SwallowException, IOException, ClassNotFoundException {
-
-		//userInfoListの読み込み
-		SCM.scm.loadUserInfo(userInfoList);
-
-		//選択されているタグを一時的に保存
-		ArrayList<Integer> selectedTagIDList = new ArrayList<>();
-		for (int i = 0; i < getVisibleTagNum(); i++) {
-			TagInfo t = findVisibleTagByIndex(i);
-			if (t.isSelected)
-				selectedTagIDList.add(t.tagID);
-		}
-
-		//tagListの読み込み
-		SCM.scm.loadTagList(visibleTagList, invisibleTagList);
-
-		//現在のタグ選択状況を復元
-		for (int i = 0; i < selectedTagIDList.size(); i++) {
-			TagInfo t = findVisibleTagById(selectedTagIDList.get(i));
-			if (t != null)
-				t.isSelected = true;
-		}
+	public final ArrayList<MessageView> refreshOnTagSelectChanged() throws SwallowException {
 
 		//messageListの更新
 		messageList.clear();
-		SCM.scm.initMessageList(messageList, getSelectedTagIDList(), context, this);
+		SCM.initMessageList(messageList);
 
 		//レイアウトの更新
 		ArrayList<MessageView> newMessageList = new ArrayList<>();
@@ -334,28 +185,11 @@ public class TalkManager {
 		return newMessageList;
 	}
 
-	public final void refreshOnUserInfoChanged_1() throws SwallowException {
+	public final void refreshOnUserInfoChanged_1() {
 
-		//userInfoListの読み込み
-		SCM.scm.loadUserInfo(userInfoList);
+		UserInfoManager.reload();
 
-		//選択されているタグを一時的に保存
-		ArrayList<Integer> selectedTagIDList = new ArrayList<>();
-		for (int i = 0; i < getVisibleTagNum(); i++) {
-			TagInfo t = findVisibleTagByIndex(i);
-			if (t.isSelected)
-				selectedTagIDList.add(t.tagID);
-		}
-
-		//tagListの読み込み
-		SCM.scm.loadTagList(visibleTagList, invisibleTagList);
-
-		//現在のタグ選択状況を復元
-		for (int i = 0; i < selectedTagIDList.size(); i++) {
-			TagInfo t = findVisibleTagById(selectedTagIDList.get(i));
-			if (t != null)
-				t.isSelected = true;
-		}
+		TagInfoManager.reload();
 	}
 
 	public final void refreshOnUserInfoChanged_2() {
@@ -365,7 +199,13 @@ public class TalkManager {
 		}
 	}
 
-	public final MessageView submit(final String text) throws SwallowException {
+//	public final ArrayList<MessageView> refreshOnUserSelected() {
+//		messageList.clear();
+//
+//	}
+
+	public final MessageView submit(String text) throws SwallowException {
+        //ファイル関連
 		ArrayList<Integer> fileId = new ArrayList<>();
 		ArrayList<FileInfo> postFileData = (ArrayList<FileInfo>)this.postFileData.clone();
 		for (FileInfo info : postFileData) {
@@ -373,42 +213,29 @@ public class TalkManager {
 			int fileID = file.getFileID();
 			fileId.add(fileID);
 		}
+        //コード挿入関連
+        StringBuilder sb = new StringBuilder(text);
+        for (String code : codeList) {
+            sb.append(MessageView.MESSAGE_SEPARATOR);
+            sb.append(code);
+        }
+        text = sb.toString();
 		Message mInfo;
 		if (isEditMode()) {
-			mInfo = SCM.scm.editMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, getSelectedTagIDList(), null, enqueteList.toArray(new String[0]), editingPostId);
+			mInfo = SCM.editMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, TagInfoManager.getSelectedTagIDForSend(), null, enqueteList.toArray(new String[0]), editingPostId);
 		} else {
-			mInfo = SCM.scm.sendMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, getSelectedTagIDList(), null, enqueteList.toArray(new String[0]));
+			mInfo = SCM.sendMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, TagInfoManager.getSelectedTagIDForSend(), null, enqueteList.toArray(new String[0]));
 		}
 		enqueteList.clear();
 		this.postFileData.clear();
+        codeList.clear();
 
-		MessageView mv = new MessageView(context, mInfo, TalkManager.this);
+		MessageView mv = new MessageView(mInfo);
 		Animation anim = createAnimationOnReflesh(5);
 		mv.anim = anim;
 		messageList.add(mv);
 		return mv;
 	}
-
-//
-//	//送信時にMessageInfoを作成
-//	private final Message createMessage(String text, Integer[] fileId) {
-//		//タグ設定
-//		ArrayList<Integer> tagId = new ArrayList<>();
-//		for (int i = 0; i < tagItemSelectedListForSend.length; i++)
-//			if (tagItemSelectedListForSend[i])
-//				tagId.add(tagList.get(i).tagID);
-//		//リプ設定
-//		ArrayList<Integer> replyId = new ArrayList<>();
-//		//宛先設定
-//		ArrayList<Integer> destId = new ArrayList<>();
-//		if (receiveFlag) {
-//			tagId.add(2); //2番は不可視タグConfirmation(既読チェック)用のもの
-//		}
-//		SCM.scm.swallow.createMessage()
-//
-//		Message mInfo = new Message(null, System.currentTimeMillis(), myUserId, text, fileId, tagId.toArray(new Integer[0]), replyId.toArray(new Integer[0]), destId.toArray(new Integer[0]), enqueteList.toArray(new String[0]), 0, null, 0, null, 0, null);
-//		return mInfo;
-//	}
 
 	private final Animation createAnimationOnInit(int index) {
 		TranslateAnimation animation = new TranslateAnimation(
@@ -438,6 +265,7 @@ public class TalkManager {
 		lv.setAnimation(mv.anim);
 		parent.addView(lv, 0);
 		parent.addView(mv, 0, mv.lp);
+		mv.initOnMainThread();
 		//ViewFlipperのアニメーションとかぶるので、若干遅延させる
 //		mv.setAnimation(mv.anim);
 //		mv.invalidate();
@@ -451,6 +279,7 @@ public class TalkManager {
 		//ViewFlipperのアニメーションとかぶるので、若干遅延させる
 		mv.setAnimation(mv.anim);
 		mv.invalidate();
+		mv.initOnMainThread();
 	}
 
 	public final void changeMessageView(MessageView after) {
@@ -488,56 +317,9 @@ public class TalkManager {
 		return bout.toByteArray();
 	}
 
-	public final UserInfo findUserById(int id) {
-		for (UserInfo u : userInfoList)
-			if (u.user.getUserID() == id)
-				return u;
-		return null;
-	}
-
-	public final TagInfo findVisibleTagById(int id) {
-		for (TagInfo t : visibleTagList)
-			if (t.tagID == id)
-				return t;
-		return null;
-	}
-
-	public final TagInfo findInvisibleTagById(int id) {
-		for (TagInfo t : invisibleTagList)
-			if (t.tagID == id)
-				return t;
-		return null;
-	}
-
-	public final TagInfo findInVisibleTagByName(String name) {
-		for (TagInfo t : invisibleTagList)
-			if (t.tagName.equals(name))
-				return t;
-		return null;
-	}
-
-	public final TagInfo findVisibleTagByIndex(int index) {
-		return visibleTagList.get(index);
-	}
-
-	public final TagInfo findVisibleTagByName(String name) {
-		for (TagInfo t : visibleTagList)
-			if (t.tagName.equals(name))
-				return t;
-		return null;
-	}
-
-	public final int getVisibleTagNum() {
-		return visibleTagList.size();
-	}
-
-	public final void addVisibleTag(TagInfo t) {
-		visibleTagList.add(t);
-	}
-
 	public final Message findMessageById(int postId) {
 		try {
-			return SCM.scm.swallow.findMessage(null, null, null, null, new Integer[]{postId}, null, null, null, null, null, null, null, null)[0];
+			return SCM.swallow.findMessage(null, null, null, null, new Integer[]{postId}, null, null, null, null, null, null, null, null)[0];
 		} catch (SwallowException e) {
 			MyUtils.showShortToast(context, "メッセージの検索に失敗しました");
 		}
@@ -555,59 +337,14 @@ public class TalkManager {
 
 	public final File findFileById(int id) {
 		try {
-			return SCM.scm.swallow.findFile(null, null, null, null, new Integer[]{id}, null, null, null)[0];
+			return SCM.swallow.findFile(null, null, null, null, new Integer[]{id}, null, null, null)[0];
 		} catch (SwallowException e) {
 			MyUtils.showShortToast(context, "ファイルの検索に失敗しました");
 		}
 		return null;
 	}
 
-	public final Integer[] getSelectedTagIDList() {
-		ArrayList<Integer> array = new ArrayList<>();
-		for (TagInfo tag : visibleTagList) {
-			if (tag.isSelected)
-				array.add(tag.tagID);
-		}
-		//既読をつけるかどうかでタグを追加
-		if (getReceivedFlag()) {
-			array.add(findInVisibleTagByName("confirmation").tagID);
-		}
-		//幼女かどうかでタグを追加
-		if (MyUtils.sp.getBoolean(MyUtils.YOJO_CHECK_KEY, false)) {
-			array.add(findInVisibleTagByName("yojo").tagID);
-		}
-		return array.toArray(new Integer[0]);
-	}
 
-	public final String getSelectedTagText() {
-		StringBuilder sb= new StringBuilder();
-		for (TagInfo tag : visibleTagList) {
-			if (tag.isSelected) {
-				sb.append(tag.tagName);
-				sb.append(",");
-			}
-		}
-		if (sb.length() > 0)
-			sb.delete(sb.length()-1, sb.length());
-		return sb.toString();
-	}
-
-	public final String getSelectedTagIDText() {
-		StringBuilder sb= new StringBuilder();
-		for (TagInfo tag : visibleTagList) {
-			if (tag.isSelected) {
-				sb.append(tag.tagID);
-				sb.append(",");
-			}
-		}
-		if (sb.length() > 0)
-			sb.delete(sb.length()-1, sb.length());
-		return sb.toString();
-	}
-
-	private final boolean getReceivedFlag() {
-		return ((CheckBox)context.findViewById(R.id.checkReceivedBox)).isChecked();
-	}
 
 	private final void saveMessageViews(final ArrayList<MessageView> mvList) {
 		new Thread(new Runnable() {
@@ -656,7 +393,7 @@ public class TalkManager {
 						if (MyUtils.sp.getBoolean(key, false) == false) {
 							//未読チェック
 							try {
-								SCM.scm.swallow.createReceived(mv.mInfo.getPostID());
+								SCM.swallow.createReceived(mv.mInfo.getPostID());
 								MyUtils.sp.edit().putBoolean(key, true).apply();
 							} catch (SwallowException e) {
 								e.printStackTrace();
@@ -666,10 +403,6 @@ public class TalkManager {
 				}
 			}
 		}
-	}
-
-	public final UserInfo getMyUserInfo() {
-		return myUserInfo;
 	}
 
 	public final boolean isReplyMode() {
@@ -698,18 +431,9 @@ public class TalkManager {
 		//編集するMessageViewを検索
 		MessageView mv = findMessageViewById(editingPostId);
 		//送信側のタグ選択状況を変更
-		for (int i = 0; i < getVisibleTagNum(); i++) {
-			TagInfo t = findVisibleTagByIndex(i);
-			t.isSelected = false;
-		}
-		for (int tagID : mv.mInfo.getTagID()) {
-			TagInfo t = findVisibleTagById(tagID);
-			if (t != null) { //t == nullはinvisibleのtag
-				t.isSelected = true;
-			}
-		}
+		TagInfoManager.setSelection(mv.mInfo.getTagID());
 		//タグ選択リストを変更
-		((Button)context.findViewById(R.id.tag_select_button)).setText(getSelectedTagText());
+				((Button) context.findViewById(R.id.tag_select_button)).setText(TagInfoManager.getSelectedTagText());
 		//入力フォームに入っている文字列を変更
 		((EditText)context.findViewById(R.id.input_text)).setText(mv.mInfo.getMessage());
 
@@ -746,10 +470,6 @@ public class TalkManager {
 
 	public final FileClipView getFileClipView() {
 		return clipView;
-	}
-
-	public final void setMyUserInfo(Swallow.UserDetail myUserInfo) {
-		this.myUserInfo = new UserInfo(myUserInfo);
 	}
 
 	public final boolean hasFile() {
@@ -791,4 +511,20 @@ public class TalkManager {
 		postFileData.remove(index);
 		clipView.removeImage(index);
 	}
+
+    public final void addCode(String code) {
+        codeList.add(code);
+    }
+
+    public final boolean hasCode() {
+        return codeList.size() > 0;
+    }
+
+    public final int getCodeNum() {
+        return codeList.size();
+    }
+
+    public final void removeCode(int index) {
+        codeList.remove(index);
+    }
 }

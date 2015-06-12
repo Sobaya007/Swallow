@@ -62,16 +62,16 @@
                 android:paddingEnd="5sp"
                 android:layout_gravity="top" />
 
-            <TextView
-                android:id="@+id/message_text"
+            <LinearLayout
+                android:id="@+id/message_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#000"
-                android:textSize="12sp"
+                android:orientation="vertical"
                 android:paddingLeft="20sp"
                 android:paddingRight="5sp"
                 android:paddingEnd="5sp"
-                android:paddingTop="30sp" />
+                android:paddingTop="30sp">
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/file_layout"

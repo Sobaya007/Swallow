@@ -1,5 +1,6 @@
 package com.trap.swallow.talk;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -8,10 +9,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.webkit.MimeTypeMap;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import com.trap.swallow.info.TagInfoManager;
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.SwallowException;
 import com.trap.swallow.swallow.MainActivity;
@@ -25,27 +28,25 @@ public class MyUtils {
 
 	public static final String SWALLOW_SECURITY_SERIALIZE_CODE = "SC";
 	public static final String GCM_REGISTRATION_FLAG = "REGISTER_ID_SEND_FLAG2";
-	public static final String SELECTED_TAG_KEY = "TAG_SELECTED";
 	public static final String YOJO_CHECK_KEY = "AmIYojo";
-	public static final String NOTIFY_TAG_KEY = "TAG_NOTIFY";
 	public static final String MESSAGE_VIEW_KEY = "MV";
 	public static final String HAS_READ_KEY = "READ";
 	public static final String ENQUETE_ANSWER_KEY = "ANSWER";
 	public static final String BACKGROUND_ENABLE_KEY = "BG";
-	public static final String MY_USER_ID_KEY = "MY_ID";
+	public static final String MESSAGE_KEY = "Message";
 
 	public static Typeface yojoFont;
 	public static SharedPreferences sp;
 	static {
 		if (MainActivity.singleton != null) {
 			sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.singleton.getApplicationContext());
-			yojoFont = Typeface.createFromAsset(MainActivity.singleton.getAssets(), "ArmedBanana.ttf");
+			yojoFont = Typeface.createFromAsset(MainActivity.singleton.getAssets(), "yojo.ttf");
 		}
 	}
 
 	public static void staticInit(Context context) {
 		sp = PreferenceManager.getDefaultSharedPreferences(context);
-		yojoFont = Typeface.createFromAsset(context.getAssets(), "ArmedBanana.ttf");
+		yojoFont = Typeface.createFromAsset(context.getAssets(), "yojo.ttf");
 	}
 
 	public static final void showShortToast(Context context, String text) {
@@ -69,7 +70,7 @@ public class MyUtils {
 		if (value == null) {
 			//Preferenceにファイルデータがないとき
 			try {
-				byte[] buf = SCM.scm.swallow.getFile(fileId);
+				byte[] buf = SCM.swallow.getFile(fileId);
 				sp.edit().putString(key, new String(buf));
 				sp.edit().apply();
 				return buf;
@@ -89,7 +90,7 @@ public class MyUtils {
 		if (value == null) {
 			//Preferenceにファイルデータがないとき
 			try {
-				byte[] buf = SCM.scm.swallow.getThumbnail(fileId, width, height);
+				byte[] buf = SCM.swallow.getThumbnail(fileId, width, height);
 				sp.edit().putString(key, new String(buf));
 				sp.edit().apply();
 				return buf;
@@ -151,5 +152,16 @@ public class MyUtils {
 
 	public static void scrollUp() {
 		TalkActivity.singleton.scrollView.fullScroll(ScrollView.FOCUS_UP);
+	}
+
+	public static final boolean getReceivedFlag() {
+		return ((CheckBox)TalkActivity.singleton.findViewById(R.id.checkReceivedBox)).isChecked();
+	}
+
+	public static final ProgressDialog createPorgressDialog() {
+		ProgressDialog progressDialog = new ProgressDialog(TalkActivity.singleton);
+		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progressDialog.setMessage("読み込み中...");
+		return progressDialog;
 	}
 }

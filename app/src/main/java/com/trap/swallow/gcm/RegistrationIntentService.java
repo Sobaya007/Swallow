@@ -61,7 +61,7 @@ public class RegistrationIntentService extends IntentService {
     private final void sendRegistrationToServer(String token) {
         Log.i("TAG", token);
         try {
-            SCM.scm.swallow.modifyUser(null, null, null, null, null, null, null, token, null, null, null);
+            SCM.swallow.modifyUser(null, null, null, null, null, null, null, token, null, null, null);
         } catch (SwallowException e) {
             e.printStackTrace();
         }

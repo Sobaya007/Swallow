@@ -29,7 +29,7 @@
             android:orientation="horizontal" >
 
             <EditText
-                android:id="@+id/drawer_search_box"
+                android:id="@+id/drawer_tag_search_box"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/tag_search_box_hint"
@@ -45,8 +45,37 @@
         <ListView
             android:id="@+id/drawer_tag_select_list"
             android:layout_width="match_parent"
-            android:layout_height="360dp"
+            android:layout_height="0sp"
+            android:layout_weight="0.3"
             android:choiceMode="multipleChoice"
+            android:gravity="top"
+            android:orientation="vertical" >
+        </ListView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <EditText
+                android:id="@+id/drawer_user_search_box"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:hint="ユーザーを検索"
+                android:singleLine="true" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/seach_icon_description"
+                android:src="@android:drawable/ic_search_category_default" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/drawer_user_select_list"
+            android:layout_width="match_parent"
+            android:layout_height="0sp"
+            android:layout_weight="0.3"
+            android:choiceMode="none"
             android:gravity="top"
             android:orientation="vertical" >
         </ListView>

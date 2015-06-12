@@ -17,7 +17,9 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.google.android.gms.gcm.GcmListenerService;
+import com.trap.swallow.info.TagInfoManager;
 import com.trap.swallow.info.UserInfo;
+import com.trap.swallow.info.UserInfoManager;
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.ServerTask;
 import com.trap.swallow.server.Swallow;
@@ -26,11 +28,13 @@ import com.trap.swallow.server.SwallowImpl;
 import com.trap.swallow.server.SwallowSecurity;
 import com.trap.swallow.swallow.MainActivity;
 import com.trap.swallow.swallow.R;
+import com.trap.swallow.talk.MessageView;
 import com.trap.swallow.talk.MyUtils;
 import com.trap.swallow.talk.TalkActivity;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import static android.support.v4.app.NotificationCompat.*;
 
@@ -50,14 +54,6 @@ public class MyGcmListenerService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         String message = data.getString("PostID");
         sendNotification(message);
-        if (TalkActivity.singleton != null) {
-            new ServerTask(TalkActivity.singleton, "更新に失敗しました") {
-                @Override
-                public void doInSubThread() throws SwallowException {
-                    TalkActivity.singleton.tvManager.loadNextMessage();
-                }
-            };
-        }
     }
 
     @Override
@@ -101,22 +97,16 @@ public class MyGcmListenerService extends GcmListenerService {
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-        String notifyTagString = MyUtils.sp.getString(MyUtils.NOTIFY_TAG_KEY, null);
-        int myUserID = MyUtils.sp.getInt(MyUtils.MY_USER_ID_KEY, -1);
-        if (notifyTagString != null
-                && myUserID != -1
+        int myUserID = UserInfoManager.getMyUserID();
+        if (myUserID != -1
                 && mInfo.getUserID() != myUserID
                 ) {
-            String[] tag = notifyTagString.split(",");
             boolean flag = false;
-            for (String t : tag) {
-                if (t.length() > 0) {
-                    int i = Integer.parseInt(t);
-                    for (int ID : mInfo.getTagID()) {
-                        if (i == ID) {
-                            flag = true;
-                            break;
-                        }
+            for (int notifID : TagInfoManager.getNotificaionTagID()) {
+                for (int ID : mInfo.getTagID()) {
+                    if (notifID == ID) {
+                        flag = true;
+                        break;
                     }
                 }
             }
@@ -153,6 +143,22 @@ public class MyGcmListenerService extends GcmListenerService {
                 builder.setVibrate(new long[]{1000, 100, 250, 100, 100, 100, 250, 100, 100, 700}); //にっこにっこにー
                 NotificationManager manager = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
                 manager.notify(0, builder.build());
+                if (TalkActivity.singleton != null) {
+                    final ArrayList<MessageView> messageViews = TalkActivity.singleton.tvManager.loadNextMessage();
+
+                    new ServerTask(TalkActivity.singleton, null) {
+
+                        @Override
+                        public void doInSubThread() throws SwallowException {}
+
+                        @Override
+                        protected void onPostExecute(Boolean aBoolean) {
+                            for (MessageView mv : messageViews) {
+                                TalkActivity.singleton.tvManager.addMessageViewToNext(mv);
+                            }
+                        }
+                    };
+                }
             }
         }
     }

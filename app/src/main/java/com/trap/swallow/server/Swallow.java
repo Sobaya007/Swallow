@@ -1,4 +1,7 @@
 package com.trap.swallow.server;
+
+import java.io.Serializable;
+
 /*
  * リクエストメソッドの引数や、レスポンスクラスのフィールドはすべてAPIアクションのparametersおよびresultsに対応しています。
  * 下記のページ(APIアクション一覧)を参考にするとわかりやすい……かもしれません。
@@ -168,7 +171,7 @@ public interface Swallow {
 	/*
 	 * レスポンス: 投稿
 	 */
-	class Message {
+	class Message implements Serializable {
 		private Integer PostID;
 		private Long Posted;
 		private Integer UserID;
@@ -311,7 +314,7 @@ public interface Swallow {
 	/*
 	 * レスポンス: お気に入り
 	 */
-	class Favorite {
+	class Favorite implements Serializable {
 		private Integer UserID;
 		private Integer PostID;
 		private Long Updated;
@@ -337,7 +340,7 @@ public interface Swallow {
 	/*
 	 * レスポンス: アンケート回答
 	 */
-	class Answer {
+	class Answer implements Serializable {
 		private Integer UserID;
 		private Integer PostID;
 		private Long Updated;
@@ -363,7 +366,7 @@ public interface Swallow {
 	/*
 	 * レスポンス: 既読
 	 */
-	class Received {
+	class Received implements Serializable{
 		private Integer UserID;
 		private Integer PostID;
 		private Long Updated;

@@ -4,7 +4,7 @@ import android.content.SharedPreferences;
 import android.util.Base64;
 import android.util.Log;
 
-import com.trap.swallow.info.TagInfo;
+import com.trap.swallow.info.TagInfoManager;
 import com.trap.swallow.info.UserInfo;
 import com.trap.swallow.server.Swallow.Message;
 import com.trap.swallow.server.Swallow.Tag;
@@ -27,18 +27,16 @@ public class SCM {
 	private static final int INITIAL_LOAD_MESSAGE_NUM = 10;
 	private static final int ADDITIONAL_LOAD_MESSAGE_NUM = 10;
 
-	public static SCM scm;
+	public static Swallow swallow;
+	public static SwallowSecurity sec;
+	public static String userName;
+	public static String password;
+	private static long latestPostedTime;
+	private static long oldestPostedTime;
 
-	public Swallow swallow;
-	private long latestPostedTime;
-	private long oldestPostedTime;
+	private SCM() {}
 
-
-	public SCM(SwallowSecurity sec) {
-		this.swallow = sec.getSwallow();
-	}
-
-	public Message sendMessage(String text, Integer[] fileID, Integer[] replyID, Integer[] tagID, Integer[] destID, String[] enquete) throws SwallowException {
+	public static Message sendMessage(String text, Integer[] fileID, Integer[] replyID, Integer[] tagID, Integer[] destID, String[] enquete) throws SwallowException {
 		//空文字はサーバー側が受け付けないらしいので、全部nullに直す
 		if (text != null && text.length() == 0)
 			text = null;
@@ -50,7 +48,7 @@ public class SCM {
 		return swallow.createMessage(text, fileID, tagID, replyID, destID, enquete, null);
 	}
 
-	public Message editMessage(String text, Integer[] fileID, Integer[] replyID, Integer[] tagID, Integer[] destID, String[] enquete, int postID) throws SwallowException {
+	public static Message editMessage(String text, Integer[] fileID, Integer[] replyID, Integer[] tagID, Integer[] destID, String[] enquete, int postID) throws SwallowException {
 		//空文字はサーバー側が受け付けないらしいので、全部nullに直す
 		if (text != null && text.length() == 0)
 			text = null;
@@ -62,16 +60,17 @@ public class SCM {
 		return swallow.createMessage(text, fileID, tagID, replyID, destID, enquete, postID);
 	}
 
-	public void deleteMessage(int postID) throws SwallowException {
+	public static void deleteMessage(int postID) throws SwallowException {
 		swallow.createMessage(null, null, null, null, null, null, postID);
 	}
 
-	public void initMessageList(List<MessageView> messageList, Integer[] tagIDs, TalkActivity context, TalkManager tvManager) throws SwallowException, IOException, ClassNotFoundException {
+	public static void initMessageList(List<MessageView> messageList) throws SwallowException {
 		//タグのみで検索をかけて、インデックスで絞る
-		Message[] messages = swallow.findMessage(0, INITIAL_LOAD_MESSAGE_NUM, null, null, null, null, tagIDs, null, null, null, null, null, null);
-		SharedPreferences.Editor editor = MyUtils.sp.edit();
+		Message[] messages = swallow.findMessage(0, INITIAL_LOAD_MESSAGE_NUM, null, null,
+				null, null, TagInfoManager.getSelectedTagIDForReceive(),
+				null, null, null, null, null, null);
 		for (Message m : messages) {
-			messageList.add(new MessageView(context, m, tvManager));
+			messageList.add(new MessageView(m));
 		}
 		if (messages.length > 0) {
 			latestPostedTime = messages[0].getPosted();
@@ -81,63 +80,76 @@ public class SCM {
 		}
 	}
 
-	public void loadOlderMessageToList(List<MessageView> messageList, Integer[] tagIDs, TalkActivity context, TalkManager tvManager) throws SwallowException {
+	public static void loadOlderMessageToList(List<MessageView> messageList) throws SwallowException {
 		//時間とタグで検索をかけて、インデックスで絞る
-		Message[] messages = swallow.findMessage(0, ADDITIONAL_LOAD_MESSAGE_NUM, null, oldestPostedTime - 1, null, null, tagIDs, null, null, null, null, null, null);
+		Message[] messages = swallow.findMessage(0, ADDITIONAL_LOAD_MESSAGE_NUM, null,
+				oldestPostedTime - 1, null, null, TagInfoManager.getSelectedTagIDForReceive(),
+				null, null, null, null, null, null);
 		for (Message m : messages) {
-			messageList.add(new MessageView(context, m, tvManager));
+			messageList.add(new MessageView(m));
 		}
 		if (messages.length != 0)
 			oldestPostedTime = messages[messages.length-1].getPosted();
 	}
 
-	public void loadNewMessagesToList(List<MessageView> messageList, Integer[] tagIDs, TalkActivity context, TalkManager tvManager) throws SwallowException {
+	public static void loadNewMessagesToList(List<MessageView> messageList) throws SwallowException {
 		//時間とタグで検索をかけて、インデックスで絞る
-		Message[] messages = swallow.findMessage(0, ADDITIONAL_LOAD_MESSAGE_NUM, latestPostedTime+1, null, null, null, tagIDs, null, null, null, null, null, null);
+		Message[] messages = swallow.findMessage(0, ADDITIONAL_LOAD_MESSAGE_NUM,
+				latestPostedTime+1, null, null, null, TagInfoManager.getSelectedTagIDForReceive(),
+				null, null, null, null, null, null);
 		for (Message m : messages) {
-			messageList.add(new MessageView(context, m, tvManager));
+			messageList.add(new MessageView(m));
 		}
 		if (messages.length != 0)
 			latestPostedTime = messages[0].getPosted();
 	}
 
-	public void loadOlderMessageToListUntil(List<MessageView> messageList, Integer[] tagIDs, TalkActivity context, TalkManager tvManager, long until) throws SwallowException {
+	public static void loadOlderMessageToListUntil(List<MessageView> messageList, long until) throws SwallowException {
 		//時間とタグで検索をかけて、インデックスで絞る
-		Message[] messages = swallow.findMessage(0, Integer.MAX_VALUE/2, until+1, oldestPostedTime-1, null, null, tagIDs, null, null, null, null, null, null);
+		Message[] messages = swallow.findMessage(0, Integer.MAX_VALUE/2, until+1,
+				oldestPostedTime-1, null, null, TagInfoManager.getSelectedTagIDForReceive(),
+				null, null, null, null, null, null);
 		for (Message m : messages) {
-			messageList.add(new MessageView(context, m, tvManager));
+			messageList.add(new MessageView(m));
 		}
 		if (messages.length != 0)
 			oldestPostedTime = messages[messages.length-1].getPosted();
 	}
 
-	public final void loadTagList(ArrayList<TagInfo> visibleTagList, ArrayList<TagInfo> invisibleTagList) throws SwallowException {
+//	public static void loadUserMessageToList(List<MessageView> messageList, int userID) throws SwallowException {
+//		Message[] messages = swallow.findMessage(0, INITIAL_LOAD_MESSAGE_NUM, null, null,
+//				null,
+//		for (Message m : messages) {
+//			messageList.add(new MessageView(m));
+//		}
+//		if (messages.length > 0) {
+//			latestPostedTime = messages[0].getPosted();
+//			oldestPostedTime = messages[messages.length - 1].getPosted();
+//		} else {
+//			latestPostedTime = oldestPostedTime = System.currentTimeMillis();
+//		}
+//	}
+
+	public static final void loadTagList(List<Tag> tagInfoList) throws SwallowException {
 		Tag[] tagArray;
-		visibleTagList.clear();
-		invisibleTagList.clear();
+		tagInfoList.clear();
 		final int LOAD_NUM = 5;
 		int index = 0;
 		do {
 			tagArray = swallow.findTag(index, index + LOAD_NUM, null, null, null, null, null);
 			for (Tag t : tagArray) {
-				TagInfo ti = new TagInfo(t.getTagName(), t.getTagID());
-				if (t.getInvisible()) {
-					invisibleTagList.add(ti);
-				} else {
-					visibleTagList.add(ti);
-				}
+				tagInfoList.add(t);
 			}
 			index += LOAD_NUM;
 		} while (tagArray.length == LOAD_NUM);
 	}
 
 	//タグ追加を送る
-	public final int sendAddTag(String tag, boolean invisible) throws SwallowException {
-		Tag t = swallow.createTag(tag, invisible);
-		return t.getTagID();
+	public static final Tag sendAddTag(String tag, boolean invisible) throws SwallowException {
+		return swallow.createTag(tag, invisible);
 	}
 
-	public final void loadUserInfo(List<UserInfo> userInfo) throws SwallowException {
+	public static final void loadUserInfo(List<UserInfo> userInfo) throws SwallowException {
 		final int LOAD_NUM = 10;
 		int index = 0;
 		userInfo.clear();

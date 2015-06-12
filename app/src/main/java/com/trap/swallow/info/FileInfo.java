@@ -25,7 +25,7 @@ public class FileInfo {
     public byte[]  data;
     public Bitmap bmp;
 
-    public FileInfo(ContentResolver contentResolver, Resources resources, Uri uri, Integer[] tagIDs) throws Exception {
+    public FileInfo(ContentResolver contentResolver, Resources resources, Uri uri) throws Exception {
 
         String scheme = uri.getScheme();
         String path = null;
@@ -57,6 +57,6 @@ public class FileInfo {
     }
 
     public Swallow.File send() throws SwallowException {
-        return SCM.scm.swallow.createFile(fileName, mimeType, tagIDs, folderContent, overwriteFileID, data);
+        return SCM.swallow.createFile(fileName, mimeType, tagIDs, folderContent, overwriteFileID, data);
     }
 }
