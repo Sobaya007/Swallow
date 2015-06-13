@@ -23,7 +23,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -118,6 +117,8 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 	private BackgroundView bgView;
 	private FileInfo userImageFile; //設定変更時の一時保存用
 
+	private final ArrayList<Boolean> tmpList = new ArrayList<>();
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -125,6 +126,9 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 
 		//Singletonを設定
 		singleton = this;
+
+		ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+		progressDialog.show();
 
 		//GCMへの登録
 		initGCM();
@@ -162,6 +166,10 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		initSetting();
 		initRefreshWidget();
 
+		MyUtils.scrollDown();
+
+		progressDialog.dismiss();
+
 		//別スレッドを起動
 		Timer t = new Timer();
 		t.schedule(new Task(), 0, 1000); //50FPS
@@ -176,6 +184,8 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 
 				break;
 			case REFLESH_BUTTON_ID:
+				final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+				progressDialog.show();
 				new ServerTask(this, "更新失敗") {
 					@Override
 					public void doInSubThread() throws SwallowException {
@@ -185,6 +195,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 					@Override
 					protected void onPostExecute(Boolean aBoolean) {
 						TalkManager.refreshOnUserInfoChanged_2();
+						progressDialog.dismiss();
 					}
 				};
 				break;
@@ -254,6 +265,8 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 
 				//トークにもどる
 				shiftToTalk();
+
+				refreshOnTagSeletChange();
 
 				if (TalkManager.isReplyMode()) {
 					//リプ中なら
@@ -396,6 +409,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 			if (sensors.size() > 0) {
 				Sensor s = sensors.get(0);
 				sManager.registerListener(bgView, s, SensorManager.SENSOR_DELAY_UI);
+				sManager.registerListener(this, s, SensorManager.SENSOR_DELAY_UI);
 			}
 			sensors = sManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
 			if (sensors.size() > 0) {
@@ -681,8 +695,6 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 
 	private final void initDrawer() {
 		DrawerLayout drawer = (DrawerLayout)findViewById(R.id.drawer_layout);
-		//Drawerを開いた時のタグ選択状況を一時保存する変数
-		final ArrayList<Boolean> tmpList = new ArrayList<>();
 
 		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
 				drawer, R.string.drawer_open,
@@ -694,59 +706,15 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 				updateTagSelectList();
 				updateUserSelectList();
 
-				//開いた時のタグを保存
-				{
-					tmpList.clear();
-					for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
-						TagInfoManager.TagInfo t = TagInfoManager.findTagByIndex(i, true);
-						tmpList.add(t.isSelected());
-					}
-				}
+				saveTagSelect();
+
 				super.onDrawerOpened(drawerView);
 			}
 			@Override
 			public void onDrawerClosed(View drawerView) {
 				//ドロワーが閉じた時の処理
-				//開いた時と選択状況が違ったら更新
-				boolean flag = false;
-				for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
-					if (tmpList.get(i) != TagInfoManager.findTagByIndex(i, true).isSelected()) {
-						flag = true;
-						break;
-					}
-				}
-				if (flag) {
-					//開いたときと違ったら
-					final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
-					progressDialog.show();
-					AsyncTask<Void, Void, ArrayList<MessageView>> task = new AsyncTask<Void, Void, ArrayList<MessageView>>() {
-						@Override
-						protected ArrayList<MessageView> doInBackground(Void... params) {
-							//MessageViewのリストを更新
-							try {
-								return TalkManager.refreshOnTagSelectChanged();
-							} catch (SwallowException e) {
-								e.printStackTrace();
-							}
-							return null;
-						}
+				refreshOnTagSeletChange();
 
-						@Override
-						protected void onPostExecute(ArrayList<MessageView> messageViews) {
-							if (messageViews != null) {
-								//更新に成功していたら、MessageViewを突っ込む
-								TalkManager.removeAllMessageViews();
-								for (MessageView mv : messageViews)
-									TalkManager.addMessageViewToPrev(mv);
-
-							} else {
-								MyUtils.showShortToast(TalkActivity.this, "更新に失敗しました");
-							}
-							progressDialog.dismiss();
-						}
-					};
-					task.execute((Void) null);
-				}
 				super.onDrawerClosed(drawerView);
 			}
 		};
@@ -929,64 +897,15 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		codeInsertButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				TextView textView = (TextView) findViewById(R.id.input_text);
-				textView.setText(textView.getText() + "``````");
-//				final AlertDialog.Builder codeDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
-//				String[] items;
-//				if (TalkManager.hasCode())
-//					items = new String[]{"コードを挿入", "コードを削除"};
-//				else
-//					items = new String[]{"コードを挿入"};
-//				codeDialogBuilder.setItems(items, new DialogInterface.OnClickListener() {
-//					@Override
-//					public void onClick(DialogInterface dialog, int which) {
-//						switch (which) {
-//							case 0: //コード挿入
-//								final AlertDialog.Builder codeInputDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
-//								LinearLayout layout = new LinearLayout(TalkActivity.this);
-//								layout.setOrientation(LinearLayout.VERTICAL);
-//								layout.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.MP));
-//								final EditText codeInput = new EditText(TalkActivity.this);
-//								codeInput.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.WC));
-//								codeInput.setLines(3);
-//								layout.addView(codeInput);
-//								codeInputDialogBuilder.setView(layout);
-//								codeInputDialogBuilder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
-//									@Override
-//									public void onClick(DialogInterface dialog, int which) {
-//										//OK押されたら
-//										TalkManager.addCode(codeInput.getText().toString());
-//									}
-//								});
-//								codeInputDialogBuilder.setNegativeButton(R.string.cancel_text, null);
-//								codeInputDialogBuilder.show();
-//								break;
-//							case 1: //コード削除
-//								AlertDialog.Builder codeDeleteDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
-//								String[] items = new String[TalkManager.getCodeNum()];
-//								for (int i = 0; i < items.length; i++)
-//									items[i] = Integer.toString(i);
-//								codeDeleteDialogBuilder.setItems(items, new DialogInterface.OnClickListener() {
-//									@Override
-//									public void onClick(DialogInterface dialog, int which) {
-//										AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
-//										confirmDialogBuilder.setMessage("本当に" + which + "番を削除してよろしいですか？");
-//										confirmDialogBuilder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
-//											@Override
-//											public void onClick(DialogInterface dialog, int which) {
-//												TalkManager.removeCode(which);
-//											}
-//										});
-//										confirmDialogBuilder.setNegativeButton(R.string.cancel_text, null);
-//										confirmDialogBuilder.show();
-//									}
-//								});
-//								codeDeleteDialogBuilder.show();
-//								break;
-//						}
-//					}
-//				});
-//				codeDialogBuilder.show();
+				EditText input = (EditText) findViewById(R.id.input_text);
+				int selection = input.getSelectionStart();
+				if (selection == -1) {
+					input.setText(input.getText() + "``````");
+				} else {
+					String str = input.getText().toString();
+					input.setText(str.substring(0, selection) + "``````" + str.substring(selection, str.length()));
+				}
+				input.setSelection(selection + 3);
 			}
 		});
 	}
@@ -1148,6 +1067,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 							for (MessageView mv : messageViews)
 								TalkManager.addMessageViewToPrev(mv);
 							((SwipeRefreshLayout) TalkActivity.singleton.findViewById(R.id.swipe_refresh_widget)).setRefreshing(false);
+							MessageViewAdapter.afterPrevAdd();
 						}
 					}
 				};
@@ -1265,6 +1185,8 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 			EditText input = (EditText)findViewById(R.id.input_text);
 			input.setText(((EditText)findViewById(R.id.input_text_dummy)).getText().toString());
 		}
+		//保存
+		saveTagSelect();
 		//input_viewへ遷移
 		ViewFlipper vf = (ViewFlipper)findViewById(R.id.flipper);
 		vf.setInAnimation(input_in_animation);
@@ -1440,6 +1362,59 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		return text.length() > 0 || TalkManager.hasFile() || TalkManager.hasEnquete();
 	}
 
+	private final void saveTagSelect() {
+		//開いた時のタグを保存
+		{
+			tmpList.clear();
+			for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
+				TagInfoManager.TagInfo t = TagInfoManager.findTagByIndex(i, true);
+				tmpList.add(t.isSelected());
+			}
+		}
+	}
+
+	private final void refreshOnTagSeletChange() {
+		boolean flag = false;
+		for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++) {
+			if (tmpList.get(i) != TagInfoManager.findTagByIndex(i, true).isSelected()) {
+				flag = true;
+				break;
+			}
+		}
+		if (flag) {
+			//開いたときと違ったら
+			final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+			progressDialog.show();
+			AsyncTask<Void, Void, ArrayList<MessageView>> task = new AsyncTask<Void, Void, ArrayList<MessageView>>() {
+				@Override
+				protected ArrayList<MessageView> doInBackground(Void... params) {
+					//MessageViewのリストを更新
+					try {
+						return TalkManager.refreshOnTagSelectChanged();
+					} catch (SwallowException e) {
+						e.printStackTrace();
+					}
+					return null;
+				}
+
+				@Override
+				protected void onPostExecute(ArrayList<MessageView> messageViews) {
+					if (messageViews != null) {
+						//更新に成功していたら、MessageViewを突っ込む
+						TalkManager.removeAllMessageViews();
+						for (MessageView mv : messageViews)
+							TalkManager.addMessageViewToPrev(mv);
+						MyUtils.scrollDown();
+					} else {
+						MyUtils.showShortToast(TalkActivity.this, "更新に失敗しました");
+					}
+					progressDialog.dismiss();
+				}
+			};
+			task.execute((Void) null);
+		}
+	}
+
 	private final void onTagSelectButtonPressed() {
 		Button tagButton = (Button)TalkActivity.this.findViewById(R.id.tag_select_button);
 		tagButton.setText(TagInfoManager.getSelectedTagText());
@@ -1513,21 +1488,30 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		}
 	}
 
+	float max_accel;
+	float[] gravity = new float[3];
+
 	@Override
 	public void onSensorChanged(SensorEvent event) {
+		if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
+			gravity[0] = event.values[0];
+			gravity[1] = event.values[1];
+			gravity[2] = event.values[2];
+		}
 		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-			float ax = event.values[0];
-			float ay = event.values[1];
-			float az = event.values[2];
+			float ax = event.values[0] - gravity[0];
+			float ay = event.values[1] - gravity[1];
+			float az = event.values[2] - gravity[2];
 			float a = (float)Math.sqrt(ax*ax + ay*ay + az*az);
-			if (a > 30) {
-				ViewFlipper flipper = (ViewFlipper)findViewById(R.id.flipper);
+			if (a > 25) {
+				max_accel = Math.max(max_accel, a);
+			} else if (a < 5 && max_accel != -1) {
+				ViewFlipper flipper = (ViewFlipper) findViewById(R.id.flipper);
 				String text;
-				TalkManager.startPost();
 				if (flipper.getCurrentView() == inputView) {
 					text = input.getText().toString();
 					if (canSend(text)) {
-						text += "\nこの投稿の加速度は" + a + "m/(s^2)でした";
+						text += "\nこの投稿の加速度は" + max_accel + "m/(s^2)でした";
 						if (submitMessage(text, input)) {
 							TalkManager.endPost();
 							//view_talkに戻る
@@ -1538,12 +1522,14 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 					EditText input = (EditText) findViewById(R.id.input_text_dummy);
 					text = input.getText().toString();
 					if (canSend(text)) {
-						text += "\nこの投稿の加速度は" + a + "m/(s^2)でした";
+						TalkManager.startPost();
+						text += "\nこの投稿の加速度は" + max_accel + "m/(s^2)でした";
 						if (submitMessage(text, input)) {
 							TalkManager.endPost();
 						}
 					}
 				}
+				max_accel = -1;
 			}
 		}
 	}

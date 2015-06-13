@@ -99,19 +99,29 @@ public class MyGcmListenerService extends GcmListenerService {
             e.printStackTrace();
         }
         int myUserID = UserInfoManager.getMyUserID();
+        int importantTagID = -1;
+        try {
+            importantTagID = swallow.findTag(null, null, null, null, null, "important", null)[0].getTagID();
+        } catch (SwallowException e) {
+            e.printStackTrace();
+        }
         if (myUserID != -1
                 && mInfo.getUserID() != myUserID
                 ) {
-            boolean flag = false;
-            for (int notifID : TagInfoManager.getNotificaionTagID()) {
-                for (int ID : mInfo.getTagID()) {
-                    if (notifID == ID) {
-                        flag = true;
+            boolean containsNotifyTag = false;
+            for (int ID : mInfo.getTagID()) {
+                if (ID == importantTagID) {
+                    containsNotifyTag = true;
+                    break;
+                }
+                for (int notifID : TagInfoManager.getNotificaionTagID()) {
+                    if (ID == notifID) {
+                        containsNotifyTag = true;
                         break;
                     }
                 }
             }
-            if (flag) {
+            if (containsNotifyTag) {
                 Builder builder = new Builder(
                         getApplicationContext());
                 if (mInfo != null) {
@@ -159,6 +169,7 @@ public class MyGcmListenerService extends GcmListenerService {
                 protected void onPostExecute(Boolean aBoolean) {
                     for (MessageView mv : messageViews) {
                         TalkManager.addMessageViewToNext(mv);
+                        MyUtils.scrollDown();
                     }
                 }
             };

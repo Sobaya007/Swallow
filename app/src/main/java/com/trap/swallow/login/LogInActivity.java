@@ -81,6 +81,7 @@ public class LogInActivity extends Activity {
 				final ProgressDialog dialog = new ProgressDialog(LogInActivity.this);
 				dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 				dialog.setMessage("読み込み中...");
+				dialog.show();
 				new ServerTask(LogInActivity.this, "ログインできません") {
 					@Override
 					public void doInSubThread() throws SwallowException {

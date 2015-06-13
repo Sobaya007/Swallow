@@ -25,7 +25,7 @@ import java.util.List;
 public class SCM {
 
 	private static final int INITIAL_LOAD_MESSAGE_NUM = 10;
-	private static final int ADDITIONAL_LOAD_MESSAGE_NUM = 10;
+	public static final int ADDITIONAL_LOAD_MESSAGE_NUM = 10;
 
 	public static Swallow swallow;
 	public static SwallowSecurity sec;
@@ -106,7 +106,7 @@ public class SCM {
 
 	public static void loadOlderMessageToListUntil(List<MessageView> messageList, long until) throws SwallowException {
 		//時間とタグで検索をかけて、インデックスで絞る
-		Message[] messages = swallow.findMessage(0, Integer.MAX_VALUE/2, until+1,
+		Message[] messages = swallow.findMessage(0, 10000000, until-1,
 				oldestPostedTime-1, null, null, TagInfoManager.getSelectedTagIDForReceive(),
 				null, null, null, null, null, null);
 		for (Message m : messages) {

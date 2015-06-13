@@ -37,7 +37,7 @@ public final class FileClipView extends View {
 	}
 
 	void addImage(Bitmap bmp) {
-		bitmaps.add(Bitmap.createScaledBitmap(bmp, getWidth() / 3, getHeight() / 3, false));
+		bitmaps.add(Bitmap.createScaledBitmap(bmp, getWidth() / 2, getHeight() / 2, false));
 		this.invalidate();
 	}
 
@@ -54,12 +54,13 @@ public final class FileClipView extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		int width = getHeight() * back.getWidth() / back.getHeight();
-		Rect rect = new Rect((getWidth() - width) / 2, 0, (getWidth() + width) / 2, getHeight());
+		int height = (int)(getHeight() * 0.8f);
+		int width = height * back.getWidth() / back.getHeight();
+		Rect rect = new Rect((getWidth() - width) / 2, 0, (getWidth() + width) / 2, height);
 		canvas.drawBitmap(back, new Rect(0, 0, back.getWidth(), back.getHeight()), rect, null);
 		float dAngle = 120.0f / (bitmaps.size()+1);
 		canvas.save();
-		canvas.translate(getWidth() * 0.5f, getHeight() * 0.5f);
+		canvas.translate(getWidth() * 0.5f, getHeight() * 0.4f);
 		canvas.rotate(-60 + dAngle);
 		for (Bitmap bmp : bitmaps) {
 			canvas.drawBitmap(bmp, -bmp.getWidth() * 0.5f, 0, null);

@@ -169,4 +169,8 @@ public class MyUtils {
 		progressDialog.setMessage("読み込み中...");
 		return progressDialog;
 	}
+
+	public static float mod(float f1, float f2) {
+		return f1 - f2 * (int)(f1 / f2);
+	}
 }

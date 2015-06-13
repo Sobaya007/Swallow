@@ -1,176 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
     >
-
-
     <LinearLayout
-        android:id="@+id/reply_text_layout"
+        android:id="@+id/main_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_marginBottom="5sp"
-        android:layout_marginEnd="5sp"
-        android:layout_marginStart="5sp"
-        android:layout_marginTop="5sp"
-        android:textColor="#00f">
-        <TextView
+        >
+
+
+        <LinearLayout
+            android:id="@+id/reply_text_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#999"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:baselineAligned="false"
-        android:paddingLeft="5sp"
-        android:paddingStart="5sp"
-        android:paddingBottom="10sp">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-
-            <ImageView
-                android:id="@+id/icon_image"
-                android:layout_width="42sp"
-                android:layout_height="42sp"
-                android:layout_marginBottom="10dp"
-                android:contentDescription="@string/message_view_user_icon_description" />
-
+            android:orientation="vertical"
+            android:layout_marginBottom="5sp"
+            android:layout_marginEnd="5sp"
+            android:layout_marginStart="5sp"
+            android:layout_marginTop="5sp"
+            android:textColor="#00f">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#999"/>
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="0sp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.7"
-            android:orientation="vertical" >
+            android:baselineAligned="false"
+            android:paddingLeft="5sp"
+            android:paddingStart="5sp"
+            android:paddingBottom="10sp">
 
-
-            <TextView
-                android:id="@+id/name_text"
-                android:textSize="16sp"
-                android:textColor="#000"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:paddingLeft="10sp"
-                android:paddingRight="5sp"
-                android:paddingEnd="5sp"
-                android:layout_gravity="top" />
-
-            <LinearLayout
-                android:id="@+id/message_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingLeft="20sp"
-                android:paddingRight="5sp"
-                android:paddingEnd="5sp"
-                android:paddingTop="30sp">
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/file_layout"
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
+
+                <ImageView
+                    android:id="@+id/icon_image"
+                    android:layout_width="42sp"
+                    android:layout_height="42sp"
+                    android:layout_marginBottom="10dp"
+                    android:contentDescription="@string/message_view_user_icon_description" />
+
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/enquete_layout"
-                android:layout_width="match_parent"
+                android:layout_width="0sp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingEnd="5sp"
-                android:paddingStart="5sp"
-                android:paddingTop="10sp" >
-            </LinearLayout>
+                android:layout_weight="0.7"
+                android:orientation="vertical" >
 
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/name_text"
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="10sp"
+                    android:paddingRight="5sp"
+                    android:paddingEnd="5sp"
+                    android:layout_gravity="top" />
 
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <TextView
-                android:id="@+id/time_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="5sp"
-                android:paddingLeft="5sp"
-                android:layout_gravity="end"
-                android:textSize="16sp"
-                android:textColor="#000" />
-            <ImageButton
-                android:id="@+id/receivedButton"
-                android:layout_width="30sp"
-                android:layout_height="30sp"
-                android:layout_marginTop="10sp"
-                android:layout_marginBottom="5sp"
-                android:layout_gravity="end"
-                android:background="@drawable/eye3_360"
-                android:scaleType="fitCenter"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="bottom">
-                <ImageButton
-                    android:id="@+id/reply_button"
-                    android:layout_width="50sp"
-                    android:layout_height="37sp"
-                    android:scaleType="fitCenter"
-                    android:paddingTop="0sp"
-                    android:paddingBottom="0sp"
-                    android:paddingLeft="0sp"
-                    android:paddingRight="0sp"
-                    android:background="@drawable/reply_button_selector"/>
                 <LinearLayout
+                    android:id="@+id/message_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_gravity="center">
+                    android:paddingLeft="20sp"
+                    android:paddingRight="5sp"
+                    android:paddingEnd="5sp"
+                    android:paddingTop="30sp">
+                </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/file_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical" >
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/enquete_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingEnd="5sp"
+                    android:paddingStart="5sp"
+                    android:paddingTop="10sp" >
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/time_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="5sp"
+                    android:paddingLeft="5sp"
+                    android:layout_gravity="end"
+                    android:textSize="16sp"
+                    android:textColor="#000" />
+                <ImageButton
+                    android:id="@+id/receivedButton"
+                    android:layout_width="30sp"
+                    android:layout_height="30sp"
+                    android:layout_marginTop="10sp"
+                    android:layout_marginBottom="5sp"
+                    android:layout_gravity="end"
+                    android:background="@drawable/eye3_360"
+                    android:scaleType="fitCenter"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="bottom">
                     <ImageButton
-                        android:id="@+id/fav_button"
-                        android:layout_width="30sp"
-                        android:layout_height="30sp"
+                        android:id="@+id/reply_button"
+                        android:layout_width="50sp"
+                        android:layout_height="37sp"
                         android:scaleType="fitCenter"
                         android:paddingTop="0sp"
                         android:paddingBottom="0sp"
                         android:paddingLeft="0sp"
                         android:paddingRight="0sp"
-                        android:layout_gravity="end"
-                        android:background="@drawable/fav_button_selector"/>
-                    <TextView
-                        android:id="@+id/fav_num_text"
-                        android:layout_width="wrap_content"
+                        android:background="@drawable/reply_button_selector"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:layout_gravity="end"/>
+                        android:orientation="vertical"
+                        android:layout_gravity="center">
+
+                        <ImageButton
+                            android:id="@+id/fav_button"
+                            android:layout_width="30sp"
+                            android:layout_height="30sp"
+                            android:scaleType="fitCenter"
+                            android:paddingTop="0sp"
+                            android:paddingBottom="0sp"
+                            android:paddingLeft="0sp"
+                            android:paddingRight="0sp"
+                            android:layout_gravity="end"
+                            android:background="@drawable/fav_button_selector"/>
+                        <TextView
+                            android:id="@+id/fav_num_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="13sp"
+                            android:layout_gravity="end"/>
+                    </LinearLayout>
                 </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="2sp"
+                android:layout_height="match_parent"
+                android:background="@drawable/dot_line"
+                android:orientation="vertical"/>
+
+            <LinearLayout
+                android:id="@+id/tag_layout"
+                android:layout_width="50sp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
             </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="2sp"
-            android:layout_height="match_parent"
-            android:background="@drawable/dot_line"
-            android:orientation="vertical"/>
-
-        <LinearLayout
-            android:id="@+id/tag_layout"
-            android:layout_width="50sp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-        </LinearLayout>
     </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>

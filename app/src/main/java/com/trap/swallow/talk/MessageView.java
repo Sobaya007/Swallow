@@ -23,6 +23,8 @@ import android.text.Html;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -31,11 +33,13 @@ import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.trap.swallow.info.TagInfoManager;
@@ -67,22 +71,17 @@ public class MessageView extends LinearLayout{
     private static final int[] tagColors = {
             Color.rgb(230, 0, 18), Color.rgb(0, 160, 233), Color.rgb(0, 153, 68), Color.rgb(14, 110, 184), Color.rgb(96,25, 134)
     };
-
     public static final String MESSAGE_SEPARATOR = "```";
 
     public Message mInfo;
-
     public int answerIndex;
-
     public Animation anim;
-
     private AlertDialog enqueteDialog;
     private AlertDialog answerDialog;
-
     private int favCount;
-
     private String[] strings;
-    private View v;
+    private FrameLayout v;
+    private Handler handler;
 
     public MessageView(final Message mInfo) {
         super(TalkActivity.singleton);
@@ -91,7 +90,8 @@ public class MessageView extends LinearLayout{
 
         this.mInfo = mInfo;
 
-        this.v = context.getLayoutInflater().inflate(R.layout.message_view, this);
+        View v = context.getLayoutInflater().inflate(R.layout.message_view, this);
+        this.v = (FrameLayout)this.getChildAt(0);
 
         //メッセージ
         {
@@ -105,11 +105,11 @@ public class MessageView extends LinearLayout{
             Integer[] reply = mInfo.getReply();
             if (reply != null && reply.length != 0) {
                 Calendar c = Calendar.getInstance();
-                for (final int postId : reply) {
+                for (final int postID : reply) {
                     StringBuilder sb = new StringBuilder();
                     Message message = null;
                     try {
-                        message = SCM.swallow.findMessage(null, null, null, null, new Integer[]{postId}, null, null, null, null, null, null, null, null)[0];
+                        message = SCM.swallow.findMessage(null, null, null, null, new Integer[]{postID}, null, null, null, null, null, null, null, null)[0];
                     } catch (SwallowException e) {
                         e.printStackTrace();
                     }
@@ -130,6 +130,8 @@ public class MessageView extends LinearLayout{
                         replyView.setOnClickListener(new OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+                                progressDialog.show();
                                 AsyncTask<Void, Void, ArrayList<MessageView>> task = new AsyncTask<Void, Void, ArrayList<MessageView>>() {
                                     @Override
                                     protected ArrayList<MessageView> doInBackground(Void... params) {
@@ -142,10 +144,11 @@ public class MessageView extends LinearLayout{
                                             for (MessageView mv : messageViews)
                                                 TalkManager.addMessageViewToPrev(mv);
 
-                                            MessageView mv = TalkManager.findMessageViewById(postId);
-                                            if (mv != null) {
-//                                                context.scrollView.smoothScrollTo(0, (int)mv.getY());
+                                            int index = MessageViewAdapter.indexOf(postID);
+                                            if (index != -1) {
+                                                context.scrollView.smoothScrollToPosition(index);
                                             }
+                                            progressDialog.dismiss();
                                         } else {
                                             MyUtils.showShortToast(context, "読み込みに失敗しました");
                                         }
@@ -614,6 +617,7 @@ public class MessageView extends LinearLayout{
             if (i % 2 == 0) messageLayout.addView(createMessageView(strings[i]));
             else            messageLayout.addView(createWebView(strings[i]));
         }
+        handler = new Handler();
     }
 
     private final TextView createMessageView(String message) {
@@ -796,7 +800,7 @@ public class MessageView extends LinearLayout{
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
                 dialog.show();
             }
             return super.onTouchEvent(event);

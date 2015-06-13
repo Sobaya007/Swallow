@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+import com.trap.swallow.server.SCM;
 import com.trap.swallow.swallow.R;
 
 import java.util.ArrayList;
@@ -15,13 +16,11 @@ import java.util.List;
  */
 public class MessageViewAdapter extends BaseAdapter {
 
-    private static MessageViewAdapter singleton;
-    private ArrayList<MessageView> messageViews = new ArrayList<>();
-    private ListView parent;
+    private static ArrayList<MessageView> messageViews = new ArrayList<>();
+    private static ListView parent;
 
     public MessageViewAdapter() {
         this.parent = (ListView)TalkActivity.singleton.findViewById(R.id.talk_scroll_view);
-        singleton = this;
     }
 
     @Override
@@ -57,10 +56,10 @@ public class MessageViewAdapter extends BaseAdapter {
     }
 
     public final static int getChildCount() {
-        return singleton.messageViews.size();
+        return messageViews.size();
     }
 
-    public final MessageView getChildAt(int index) {
+    public static final MessageView getChildAt(int index) {
         return messageViews.get(index);
     }
 
@@ -72,5 +71,18 @@ public class MessageViewAdapter extends BaseAdapter {
     public final void clear() {
         messageViews.clear();
         notifyDataSetChanged();
+    }
+
+    public static final int indexOf(int postID) {
+        for (int i = 0; i < messageViews.size(); i++) {
+            if (messageViews.get(i).mInfo.getPostID() == postID) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static void afterPrevAdd() {
+        parent.setSelection(SCM.ADDITIONAL_LOAD_MESSAGE_NUM);
     }
 }
