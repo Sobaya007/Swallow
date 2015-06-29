@@ -1,5 +1,8 @@
 package com.trap.swallow.talk;
 
+import android.app.ProgressDialog;
+import android.database.DataSetObserver;
+import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -18,9 +21,29 @@ public class MessageViewAdapter extends BaseAdapter {
 
     private static ArrayList<MessageView> messageViews = new ArrayList<>();
     private static ListView parent;
+    public static ProgressDialog progressDialog;
+    private static int preSize;
 
     public MessageViewAdapter() {
         this.parent = (ListView)TalkActivity.singleton.findViewById(R.id.talk_scroll_view);
+        registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            MyUtils.scrollDown();
+                            TalkActivity.singleton.scrollView.setSelection(getChildCount()-1);
+                        }
+                    }, 100);
+                }
+                preSize = getChildCount();
+            }
+        });
     }
 
     @Override
@@ -83,6 +106,13 @@ public class MessageViewAdapter extends BaseAdapter {
     }
 
     public static void afterPrevAdd() {
-        parent.setSelection(SCM.ADDITIONAL_LOAD_MESSAGE_NUM);
+        parent.setSelection(getChildCount() - preSize);
+        preSize = getChildCount();
+    }
+
+    public static void refresh() {
+        for (MessageView mv : messageViews) {
+            mv.refreshOnServerThraed();
+        }
     }
 }

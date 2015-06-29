@@ -1,7 +1,5 @@
 package com.trap.swallow.server;
 
-import java.io.Serializable;
-
 /*
  * リクエストメソッドの引数や、レスポンスクラスのフィールドはすべてAPIアクションのparametersおよびresultsに対応しています。
  * 下記のページ(APIアクション一覧)を参考にするとわかりやすい……かもしれません。
@@ -19,9 +17,8 @@ public interface Swallow {
 	 * ユーザ情報を編集
 	 */
 	public UserDetail modifyUser(String userName, String profile,
-								 Integer imageFileID, String password, String email, String web,
-								 String twitter, String gcm, String apns, Integer[] observeTagIDs,
-								 Boolean observeMention) throws SwallowException;
+								 Integer imageFileID, String password, String email,
+								 Integer[] observeTagIDs, String gcm) throws SwallowException;
 
 	/*
 	 * 投稿を取得
@@ -29,16 +26,15 @@ public interface Swallow {
 	public Message[] findMessage(Integer startIndex, Integer endIndex,
 								 Long fromTime, Long toTime, Integer[] postIDs,
 								 Integer[] postedUserIDs, Integer[] tagIDs, Integer[] replyPostIDs,
-								 Integer[] destUserIDs, String messagePattern,
-								 Boolean hasAttachment, Boolean isEnquete, Boolean convertToKana)
-			throws SwallowException;
+								 String messagePattern, Boolean hasAttachment, Boolean isEnquete,
+								 Boolean convertToKana) throws SwallowException;
 
 	/*
 	 * 投稿する
 	 */
 	public Message createMessage(String message, Integer[] fileIDs,
-								 Integer[] tagIDs, Integer[] replyPostIDs, Integer[] destUserIDs,
-								 String[] enquetes, Integer overwritePostID) throws SwallowException;
+								 Integer[] tagIDs, Integer[] replyPostIDs, String[] enquetes,
+								 Integer overwritePostID) throws SwallowException;
 
 	/*
 	 * ファイルを探す
@@ -71,13 +67,14 @@ public interface Swallow {
 	 */
 	public Tag[] findTag(Integer startIndex, Integer endIndex, Long fromTime,
 						 Long toTime, Integer[] tagIDs, String tagNamePattern,
-						 Boolean isInvisible) throws SwallowException;
+						 Integer[] participantUserIDs, Boolean isInvisible,
+						 Boolean isArchived) throws SwallowException;
 
 	/*
 	 * タグを作成
 	 */
-	public Tag createTag(String tagName, Boolean invisible)
-			throws SwallowException;
+	public Tag createTag(String tagName, Integer[] participantUserIDs,
+						 Boolean invisible, Integer archiveTagtID) throws SwallowException;
 
 	/*
 	 * ふぁぼる
@@ -132,46 +129,26 @@ public interface Swallow {
 	 */
 	class UserDetail extends User {
 		private String Email;
-		private String Web;
-		private String Twitter;
+		private Integer[] Observe;
 		private String GCM;
-		private String APNs;
-		private Integer[] ObserveTag;
-		private Boolean ObserveMention;
 
 		public String getEmail() {
 			return Email;
 		}
 
-		public String getWeb() {
-			return Web;
-		}
-
-		public String getTwitter() {
-			return Twitter;
+		public Integer[] getObserve() {
+			return Observe;
 		}
 
 		public String getGCM() {
 			return GCM;
-		}
-
-		public String getAPNs() {
-			return APNs;
-		}
-
-		public Integer[] getObserveTag() {
-			return ObserveTag;
-		}
-
-		public Boolean getObserveMention() {
-			return ObserveMention;
 		}
 	}
 
 	/*
 	 * レスポンス: 投稿
 	 */
-	class Message implements Serializable {
+	class Message {
 		private Integer PostID;
 		private Long Posted;
 		private Integer UserID;
@@ -179,7 +156,6 @@ public interface Swallow {
 		private Integer[] FileID;
 		private Integer[] TagID;
 		private Integer[] Reply;
-		private Integer[] Dest;
 		private String[] Enquete;
 		private Integer FavCount;
 		private Favorite[] Fav;
@@ -214,10 +190,6 @@ public interface Swallow {
 
 		public Integer[] getReply() {
 			return Reply;
-		}
-
-		public Integer[] getDest() {
-			return Dest;
 		}
 
 		public String[] getEnquete() {
@@ -292,7 +264,9 @@ public interface Swallow {
 		private Integer TagID;
 		private Long Updated;
 		private String TagName;
+		private Integer[] Participant;
 		private Boolean Invisible;
+		private Boolean Archived;
 
 		public Integer getTagID() {
 			return TagID;
@@ -306,15 +280,23 @@ public interface Swallow {
 			return TagName;
 		}
 
+		public Integer[] getParticipant() {
+			return Participant;
+		}
+
 		public Boolean getInvisible() {
 			return Invisible;
+		}
+
+		public Boolean getArchived() {
+			return Archived;
 		}
 	}
 
 	/*
 	 * レスポンス: お気に入り
 	 */
-	class Favorite implements Serializable {
+	class Favorite {
 		private Integer UserID;
 		private Integer PostID;
 		private Long Updated;
@@ -340,7 +322,7 @@ public interface Swallow {
 	/*
 	 * レスポンス: アンケート回答
 	 */
-	class Answer implements Serializable {
+	class Answer {
 		private Integer UserID;
 		private Integer PostID;
 		private Long Updated;
@@ -366,7 +348,7 @@ public interface Swallow {
 	/*
 	 * レスポンス: 既読
 	 */
-	class Received implements Serializable{
+	class Received {
 		private Integer UserID;
 		private Integer PostID;
 		private Long Updated;

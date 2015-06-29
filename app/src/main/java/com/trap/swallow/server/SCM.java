@@ -29,26 +29,24 @@ public class SCM {
 
 	public static Swallow swallow;
 	public static SwallowSecurity sec;
-	public static String userName;
-	public static String password;
 	private static long latestPostedTime;
 	private static long oldestPostedTime;
 
 	private SCM() {}
 
-	public static Message sendMessage(String text, Integer[] fileID, Integer[] replyID, Integer[] tagID, Integer[] destID, String[] enquete) throws SwallowException {
+	public static Message sendMessage(String text, Integer[] fileID, Integer[] replyID, Integer[] tagID, String[] enquete) throws SwallowException {
 		//空文字はサーバー側が受け付けないらしいので、全部nullに直す
-		if (text != null && text.length() == 0)
-			text = null;
+		if (text == null)
+			text = "";
 		for (int i = 0; i < enquete.length; i++) {
 			if (enquete[i] != null && enquete[i].length() == 0) {
 				enquete[i] = null;
 			}
 		}
-		return swallow.createMessage(text, fileID, tagID, replyID, destID, enquete, null);
+		return swallow.createMessage(text, fileID, tagID, replyID, enquete, null);
 	}
 
-	public static Message editMessage(String text, Integer[] fileID, Integer[] replyID, Integer[] tagID, Integer[] destID, String[] enquete, int postID) throws SwallowException {
+	public static Message editMessage(String text, Integer[] fileID, Integer[] replyID, Integer[] tagID, String[] enquete, int postID) throws SwallowException {
 		//空文字はサーバー側が受け付けないらしいので、全部nullに直す
 		if (text != null && text.length() == 0)
 			text = null;
@@ -57,18 +55,18 @@ public class SCM {
 				enquete[i] = null;
 			}
 		}
-		return swallow.createMessage(text, fileID, tagID, replyID, destID, enquete, postID);
+		return swallow.createMessage(text, fileID, tagID, replyID, enquete, postID);
 	}
 
 	public static void deleteMessage(int postID) throws SwallowException {
-		swallow.createMessage(null, null, null, null, null, null, postID);
+		swallow.createMessage("", null, null, null, null, postID);
 	}
 
 	public static void initMessageList(List<MessageView> messageList) throws SwallowException {
 		//タグのみで検索をかけて、インデックスで絞る
 		Message[] messages = swallow.findMessage(0, INITIAL_LOAD_MESSAGE_NUM, null, null,
 				null, null, TagInfoManager.getSelectedTagIDForReceive(),
-				null, null, null, null, null, null);
+				null, null, null, null, null);
 		for (Message m : messages) {
 			messageList.add(new MessageView(m));
 		}
@@ -84,7 +82,7 @@ public class SCM {
 		//時間とタグで検索をかけて、インデックスで絞る
 		Message[] messages = swallow.findMessage(0, ADDITIONAL_LOAD_MESSAGE_NUM, null,
 				oldestPostedTime - 1, null, null, TagInfoManager.getSelectedTagIDForReceive(),
-				null, null, null, null, null, null);
+				null, null, null, null, null);
 		for (Message m : messages) {
 			messageList.add(new MessageView(m));
 		}
@@ -96,7 +94,7 @@ public class SCM {
 		//時間とタグで検索をかけて、インデックスで絞る
 		Message[] messages = swallow.findMessage(0, ADDITIONAL_LOAD_MESSAGE_NUM,
 				latestPostedTime+1, null, null, null, TagInfoManager.getSelectedTagIDForReceive(),
-				null, null, null, null, null, null);
+				null, null, null, null, null);
 		for (Message m : messages) {
 			messageList.add(new MessageView(m));
 		}
@@ -108,26 +106,12 @@ public class SCM {
 		//時間とタグで検索をかけて、インデックスで絞る
 		Message[] messages = swallow.findMessage(0, 10000000, until-1,
 				oldestPostedTime-1, null, null, TagInfoManager.getSelectedTagIDForReceive(),
-				null, null, null, null, null, null);
+				null, null, null, null, null);
 		for (Message m : messages) {
 			messageList.add(new MessageView(m));
 		}
 		if (messages.length != 0)
 			oldestPostedTime = messages[messages.length-1].getPosted();
-	}
-
-	public static void loadUserMessageToList(List<MessageView> messageList, int userID) throws SwallowException {
-		Message[] messages = swallow.findMessage(0, INITIAL_LOAD_MESSAGE_NUM, null, null,
-				null, null, null, null, new Integer[]{userID}, null, null, null, null);
-		for (Message m : messages) {
-			messageList.add(new MessageView(m));
-		}
-		if (messages.length > 0) {
-			latestPostedTime = messages[0].getPosted();
-			oldestPostedTime = messages[messages.length - 1].getPosted();
-		} else {
-			latestPostedTime = oldestPostedTime = System.currentTimeMillis();
-		}
 	}
 
 	public static final void loadTagList(List<Tag> tagInfoList) throws SwallowException {
@@ -136,17 +120,12 @@ public class SCM {
 		final int LOAD_NUM = 5;
 		int index = 0;
 		do {
-			tagArray = swallow.findTag(index, index + LOAD_NUM, null, null, null, null, null);
+			tagArray = swallow.findTag(index, index + LOAD_NUM, null, null, null, null, null, null, null);
 			for (Tag t : tagArray) {
 				tagInfoList.add(t);
 			}
 			index += LOAD_NUM;
 		} while (tagArray.length == LOAD_NUM);
-	}
-
-	//タグ追加を送る
-	public static final Tag sendAddTag(String tag, boolean invisible) throws SwallowException {
-		return swallow.createTag(tag, invisible);
 	}
 
 	public static final void loadUserInfo(List<UserInfo> userInfo) throws SwallowException {

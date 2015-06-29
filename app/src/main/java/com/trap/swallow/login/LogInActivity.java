@@ -6,18 +6,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.trap.swallow.gcm.RegistrationIntentService;
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.ServerTask;
 import com.trap.swallow.server.Swallow;
 import com.trap.swallow.server.SwallowException;
-import com.trap.swallow.server.SwallowImpl;
 import com.trap.swallow.server.SwallowSecurity;
 import com.trap.swallow.swallow.R;
 import com.trap.swallow.talk.MyUtils;
@@ -46,7 +48,7 @@ public class LogInActivity extends Activity {
 				new ServerTask(this, "") {
 					@Override
 					public void doInSubThread() throws SwallowException {
-						swallow.modifyUser(null, null, null, null, null, null, null, null, null, null, null);
+						swallow.modifyUser(null, null, null, null, null, null, null);
 					}
 
 					@Override
@@ -82,25 +84,36 @@ public class LogInActivity extends Activity {
 				dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 				dialog.setMessage("読み込み中...");
 				dialog.show();
-				new ServerTask(LogInActivity.this, "ログインできません") {
-					@Override
-					public void doInSubThread() throws SwallowException {
-						//Serialコードがなかったら、サーバーにユーザー名とパスワードを送ってログイン
+				AsyncTask<Void, Void, Boolean> task = new AsyncTask<Void, Void, Boolean>() {
 
-						SwallowSecurity sec;
-						sec = new SwallowSecurity();
-						sec.login(userNameInput.getText().toString(), passwordInput.getText().toString());
-						//SerialコードをPreferenceに保存
-						MyUtils.sp.edit().putString(MyUtils.SWALLOW_SECURITY_SERIALIZE_CODE, sec.serialize()).apply();
-						//TalkActivityへ
-						toNext(new SwallowImpl(sec), sec);
+					@Override
+					protected Boolean doInBackground(Void... params) {
+						try {
+							//Serialコードがなかったら、サーバーにユーザー名とパスワードを送ってログイン
+
+							SwallowSecurity sec;
+							sec = new SwallowSecurity();
+							sec.login(userNameInput.getText().toString(), passwordInput.getText().toString());
+							//SerialコードをPreferenceに保存
+							MyUtils.sp.edit().putString(MyUtils.SWALLOW_SECURITY_SERIALIZE_CODE, sec.serialize()).apply();
+							//TalkActivityへ
+							toNext(sec.getSwallow(), sec);
+							return true;
+						} catch (SwallowException e) {
+							e.printStackTrace();
+						}
+						return false;
 					}
 
 					@Override
-					protected void onPostExecute(Boolean aBoolean) {
+					protected void onPostExecute(Boolean b) {
+						if (!b) {
+							Toast.makeText(LogInActivity.this, "ログインできませんでした", Toast.LENGTH_SHORT);
+						}
 						dialog.dismiss();
 					}
 				};
+				task.execute();
 			}
 		});
 

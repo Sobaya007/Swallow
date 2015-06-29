@@ -24,7 +24,6 @@ import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.ServerTask;
 import com.trap.swallow.server.Swallow;
 import com.trap.swallow.server.SwallowException;
-import com.trap.swallow.server.SwallowImpl;
 import com.trap.swallow.server.SwallowSecurity;
 import com.trap.swallow.swallow.MainActivity;
 import com.trap.swallow.swallow.R;
@@ -76,14 +75,14 @@ public class MyGcmListenerService extends GcmListenerService {
 
         MyUtils.staticInit(getApplicationContext());
 
-        SwallowImpl swallow = null;
+        Swallow swallow = null;
         String serial = MyUtils.sp.getString(MyUtils.SWALLOW_SECURITY_SERIALIZE_CODE, null);
         //Serialコードがあったなら
         if (serial != null) {
             try {
                 //SwallowSecurityを取得してTalkActivityへ
                 SwallowSecurity sec = SwallowSecurity.deserialize(serial);
-                swallow = new SwallowImpl(sec);
+                swallow = sec.getSwallow();
             } catch (SwallowException e) {
                 e.printStackTrace();
             }
@@ -92,25 +91,19 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Swallow.Message mInfo = null;
         try {
-            mInfo = swallow.findMessage(null, null, null, null, new Integer[]{Integer.parseInt(message)}, null, null, null, null, null, null, null, null)[0];
+            mInfo = swallow.findMessage(null, null, null, null, new Integer[]{Integer.parseInt(message)}, null, null, null, null, null, null, null)[0];
         } catch (SwallowException e) {
             e.printStackTrace();
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
         int myUserID = UserInfoManager.getMyUserID();
-        int importantTagID = -1;
-        try {
-            importantTagID = swallow.findTag(null, null, null, null, null, "important", null)[0].getTagID();
-        } catch (SwallowException e) {
-            e.printStackTrace();
-        }
         if (myUserID != -1
                 && mInfo.getUserID() != myUserID
                 ) {
             boolean containsNotifyTag = false;
             for (int ID : mInfo.getTagID()) {
-                if (ID == importantTagID) {
+                if (ID == 5) { //5はimportant
                     containsNotifyTag = true;
                     break;
                 }
@@ -152,6 +145,7 @@ public class MyGcmListenerService extends GcmListenerService {
                         new Intent(this, MainActivity.class), 0));
                 builder.setColor(0xff005C92); //(0x005C92
                 builder.setVibrate(new long[]{1000, 100, 250, 100, 100, 100, 250, 100, 100, 700}); //にっこにっこにー
+                builder.setLights(0xff005C92, 100, 100);
                 NotificationManager manager = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
                 manager.notify(0, builder.build());
             }

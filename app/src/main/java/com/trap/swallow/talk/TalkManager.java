@@ -1,51 +1,31 @@
 package com.trap.swallow.talk;
 
-import android.content.SharedPreferences;
 import android.graphics.Point;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Base64;
-import android.util.Log;
 import android.view.Display;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.trap.swallow.info.FileInfo;
 import com.trap.swallow.info.TagInfoManager;
-import com.trap.swallow.info.UserInfo;
 import com.trap.swallow.info.UserInfoManager;
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.ServerTask;
 import com.trap.swallow.server.Swallow;
 import com.trap.swallow.server.Swallow.File;
 import com.trap.swallow.server.Swallow.Message;
-import com.trap.swallow.server.Swallow.User;
 import com.trap.swallow.server.SwallowException;
 import com.trap.swallow.swallow.R;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /*
@@ -76,6 +56,7 @@ public class TalkManager {
 		TagInfoManager.reload();
 
 		//messageListの読み込み
+		messageList.clear();
 		SCM.initMessageList(messageList);
 
 	}
@@ -199,12 +180,14 @@ public class TalkManager {
 		UserInfoManager.reload();
 
 		TagInfoManager.reload();
+
+		parent.refresh();
 	}
 
 	public final static void refreshOnUserInfoChanged_2() {
 		//messageListの更新
 		for (MessageView mv : messageList) {
-			mv.refleshOnUserInfoChanged();
+			mv.refreshOnUserInfoChanged();
 		}
 	}
 
@@ -241,9 +224,9 @@ public class TalkManager {
 		text = sb.toString();
 		Message mInfo;
 		if (isEditMode()) {
-			mInfo = SCM.editMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, TagInfoManager.getSelectedTagIDForSend(), null, enqueteList.toArray(new String[0]), editingPostId);
+			mInfo = SCM.editMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, TagInfoManager.getSelectedTagIDForSend(), enqueteList.toArray(new String[0]), editingPostId);
 		} else {
-			mInfo = SCM.sendMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, TagInfoManager.getSelectedTagIDForSend(), null, enqueteList.toArray(new String[0]));
+			mInfo = SCM.sendMessage(text, fileId.toArray(new Integer[0]), replyPostId == -1 ? null : new Integer[]{replyPostId}, TagInfoManager.getSelectedTagIDForSend(), enqueteList.toArray(new String[0]));
 		}
 		enqueteList.clear();
 		TalkManager.postFileData.clear();
@@ -423,6 +406,7 @@ public class TalkManager {
 	public static final void endPost() {
 		((EditText)context.findViewById(R.id.input_text_dummy)).setText("");
 		((EditText)context.findViewById(R.id.input_text)).setText("");
+		((CheckBox)context.findViewById(R.id.mention_check)).setChecked(false);
 		clearFile();
 		clearEnquete();
 	}

@@ -21,7 +21,7 @@ public final class UserInfoManager {
     public static boolean reload() {
         try {
             SCM.loadUserInfo(userInfoList);
-            myUserInfo = new UserInfo(SCM.swallow.modifyUser(null, null, null, null, null, null, null, null, null, null, null));
+            myUserInfo = new UserInfo(SCM.swallow.modifyUser(null, null, null, null, null, null, null));
             MyUtils.sp.edit().putInt(MY_USER_ID_KEY, myUserInfo.user.getUserID()).apply();
         } catch (SwallowException e) {
             e.printStackTrace();

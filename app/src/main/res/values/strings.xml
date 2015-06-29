@@ -22,7 +22,7 @@
     <string name="drawer_close">ドロワー、閉じます</string>
     <string name="message_delete_failed_text">メッセージの削除に失敗しました</string>
     <string name="user_load_failed_text">ユーザー情報の取得に失敗しました</string>
-    <string name="user_name_input_hint">ユーザー名を入力</string>
+    <string name="user_name_input_hint">メアドを入力</string>
     <string name="password_input_hint">パスワードを入力</string>
     <string name="login_button_text">ログイン</string>
     <string name="tag_search_box_hint">タグを検索</string>

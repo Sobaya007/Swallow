@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.trap.swallow.talk.MyUtils;
+import com.trap.swallow.talk.TalkActivity;
 
 /**
  * Created by Sobaya on 2015/05/23.

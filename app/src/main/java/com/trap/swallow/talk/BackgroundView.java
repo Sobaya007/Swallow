@@ -409,7 +409,7 @@ public class BackgroundView extends GLSurfaceView implements Renderer, SensorEve
 	private ObjectForSweep[] list = new ObjectForSweep[balls.length*2];
 	private ArrayList<ObjectForSweep>[] bucket = new ArrayList[10];
 	private ArrayList<ObjectForSweep>[] bucket2 = new ArrayList[10];
-	private ArrayList<CollisionInfo> collisionList = new ArrayList<CollisionInfo>();
+	private ArrayList<CollisionInfo> collisionList = new ArrayList<>();
 	MotionEvent e;
 	float tx, ty;
 	float gx, gy;

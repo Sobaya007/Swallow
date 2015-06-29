@@ -74,7 +74,7 @@ public class MessageView extends LinearLayout{
     public static final String MESSAGE_SEPARATOR = "```";
 
     public Message mInfo;
-    public int answerIndex;
+    private int answerIndex;
     public Animation anim;
     private AlertDialog enqueteDialog;
     private AlertDialog answerDialog;
@@ -93,9 +93,14 @@ public class MessageView extends LinearLayout{
         View v = context.getLayoutInflater().inflate(R.layout.message_view, this);
         this.v = (FrameLayout)this.getChildAt(0);
 
+        //背景
+        {
+//            int bgColor = tagColors[mInfo.getUserID() % tagColors.length];
+//            this.setBackgroundColor(Color.argb(50, Color.red(bgColor), Color.green(bgColor), Color.blue(bgColor)));
+        }
+
         //メッセージ
         {
-            LinearLayout layout = (LinearLayout)v.findViewById(R.id.message_layout);
             strings = mInfo.getMessage().split(MESSAGE_SEPARATOR);
         }
 
@@ -109,7 +114,7 @@ public class MessageView extends LinearLayout{
                     StringBuilder sb = new StringBuilder();
                     Message message = null;
                     try {
-                        message = SCM.swallow.findMessage(null, null, null, null, new Integer[]{postID}, null, null, null, null, null, null, null, null)[0];
+                        message = SCM.swallow.findMessage(null, null, null, null, new Integer[]{postID}, null, null, null, null, null, null, null)[0];
                     } catch (SwallowException e) {
                         e.printStackTrace();
                     }
@@ -173,9 +178,11 @@ public class MessageView extends LinearLayout{
             iconView.setImageBitmap(sender.profileImage);
             iconView.setOnClickListener(new OnClickListener() {
                 public void onClick(View paramView) {
+                    final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+                    progressDialog.show();
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
                     LinearLayout l = new LinearLayout(context);
-                    l.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.MP));
+                    l.setLayoutParams(MyUtils.getLayoutparams(MyUtils.WC, MyUtils.WC));
                     context.getLayoutInflater().inflate(R.layout.dialog_user, l);
                     TextView userName = (TextView) l.findViewById(R.id.user_name);
                     TextView profile = (TextView) l.findViewById(R.id.user_profile);
@@ -186,6 +193,8 @@ public class MessageView extends LinearLayout{
                     imageView.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            final ProgressDialog progressDialog1 = MyUtils.createPorgressDialog();
+                            progressDialog1.show();
                             new ServerTask(context, "画像の読み込みに失敗しました") {
                                 @Override
                                 public void doInSubThread() throws SwallowException {
@@ -212,10 +221,16 @@ public class MessageView extends LinearLayout{
                                     intent.setDataAndType(Uri.parse(path), file.getFileType());
                                     context.startActivity(intent);
                                 }
+
+                                @Override
+                                protected void onPostExecute(Boolean aBoolean) {
+                                    progressDialog1.dismiss();
+                                }
                             };
                         }
                     });
                     b.setView(l);
+                    progressDialog.dismiss();
                     b.show();
                 }
             });
@@ -252,6 +267,8 @@ public class MessageView extends LinearLayout{
                     layout.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+                            progressDialog.show();
                             final String fileType = file.getFileType();
                             final Intent intent = new Intent();
                             intent.setType(fileType);
@@ -309,7 +326,10 @@ public class MessageView extends LinearLayout{
                                     }
                                 }
 
-
+                                @Override
+                                protected void onPostExecute(Boolean aBoolean) {
+                                    progressDialog.dismiss();
+                                }
                             };
                         }
                     });
@@ -350,9 +370,11 @@ public class MessageView extends LinearLayout{
         //アンケート
         {
             final String[] enqeteList = mInfo.getEnquete();
+            this.answerIndex = MyUtils.sp.getInt(MyUtils.ENQUETE_ANSWER_KEY + mInfo.getPostID(), -1);
             if (enqeteList != null){
                 LinearLayout enqueteLayout = (LinearLayout)v.findViewById(R.id.enquete_layout);
-                for (String selection : enqeteList) {
+                for (int i = 0; i < enqeteList.length; i++) {
+                    String selection = enqeteList[i];
                     LinearLayout layout = new LinearLayout(context);
                     layout.setOrientation(LinearLayout.HORIZONTAL);
                     layout.setLayoutParams(
@@ -365,7 +387,10 @@ public class MessageView extends LinearLayout{
                             new LayoutParams(
                                     LayoutParams.WRAP_CONTENT,
                                     LayoutParams.WRAP_CONTENT));
-                    im.setImageResource(android.R.drawable.presence_invisible);
+                    if (i == answerIndex)
+                        im.setImageResource(android.R.drawable.presence_online);
+                    else
+                        im.setImageResource(android.R.drawable.presence_invisible);
 
                     TextView tv = new TextView(context);
                     tv.setLayoutParams(
@@ -386,13 +411,13 @@ public class MessageView extends LinearLayout{
                     enqueteDialogBuilder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (answerIndex != -1) {
+                            if (MessageView.this.answerIndex != -1) {
                                 new ServerTask(context, "アンケート回答失敗です") {
                                     @Override
                                     public void doInSubThread() throws SwallowException {
-                                        SCM.swallow.createAnswer(mInfo.getPostID(), answerIndex);
+                                        SCM.swallow.createAnswer(mInfo.getPostID(), MessageView.this.answerIndex);
                                         SharedPreferences.Editor editor = MyUtils.sp.edit();
-                                        editor.putBoolean("A" + mInfo.getPostID(), true);
+                                        editor.putInt(MyUtils.ENQUETE_ANSWER_KEY + mInfo.getPostID(), answerIndex);
                                         editor.apply();
                                     }
                                 };
@@ -403,7 +428,7 @@ public class MessageView extends LinearLayout{
                     enqueteDialogBuilder.setSingleChoiceItems(enqeteList, -1, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            answerIndex = which;
+                            MessageView.this.answerIndex = which;
                         }
                     });
 
@@ -414,11 +439,11 @@ public class MessageView extends LinearLayout{
                     enqueteLayout.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
-                            progressDialog.show();
                             //その投稿が自分のものかどうか
                             if (mInfo.getUserID() == UserInfoManager.getMyUserInfo().user.getUserID()) {
                                 //自分のものであったなら
+                                final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+                                progressDialog.show();
                                 final ArrayList[] answers = new ArrayList[enqeteList.length];
                                 for (int i = 0; i < answers.length; i++)
                                     answers[i] = new ArrayList();
@@ -426,7 +451,7 @@ public class MessageView extends LinearLayout{
                                     @Override
                                     public void doInSubThread() throws SwallowException {
                                         //回答者名を回答ごとに仕分け
-                                        Message m = SCM.swallow.findMessage(null, null, null, null, new Integer[]{mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
+                                        Message m = SCM.swallow.findMessage(null, null, null, null, new Integer[]{mInfo.getPostID()}, null, null, null, null, null, null, null)[0];
                                         for (Swallow.Answer a : m.getAnswer()) {
                                             answers[a.getAnswer()].add(a.getUserID());
                                         }
@@ -454,8 +479,10 @@ public class MessageView extends LinearLayout{
                                 //自分のものでなかったら
                                 //既に答えているかどうかPreferenceで確認
                                 String key = MyUtils.ENQUETE_ANSWER_KEY + mInfo.getPostID();
-                                boolean value = MyUtils.sp.getBoolean(key, false);
-                                if (value == false) {
+                                int value = MyUtils.sp.getInt(key, -1);
+                                if (value == -1) {
+                                    final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+                                    progressDialog.show();
                                     //まだ答えていなかったら
                                     if (enqueteDialog == null)
                                         enqueteDialog = enqueteDialogBuilder.create();
@@ -481,7 +508,7 @@ public class MessageView extends LinearLayout{
                         @Override
                         public void doInSubThread() throws SwallowException {
                             SCM.swallow.createFavorite(MessageView.this.mInfo.getPostID(), 1);
-                            MessageView.this.mInfo = SCM.swallow.findMessage(null, null, null, null, new Integer[]{MessageView.this.mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
+                            MessageView.this.mInfo = SCM.swallow.findMessage(null, null, null, null, new Integer[]{MessageView.this.mInfo.getPostID()}, null, null, null, null, null, null, null)[0];
                         }
                     };
                     favNumView.setText(String.valueOf(++favCount));
@@ -496,15 +523,17 @@ public class MessageView extends LinearLayout{
             if (tagIdArray != null) {
                 for (int i = 0; i < tagIdArray.length; i++) {
                     TagInfoManager.TagInfo tag = TagInfoManager.findTagByID(tagIdArray[i]);
-                    if (tag != null && !tag.tag.getInvisible()) {
-                        String tagName = tag.tag.getTagName();
-                        TextView textView = new TextView(context);
-                        textView.setText(tagName);
-                        textView.setTextColor(tagColors[i % tagColors.length]);
-                        textView.setGravity(Gravity.CENTER);
-                        textView.setTextSize(10);
-                        tagLayout.addView(textView);
-                    }
+                    if (tag == null) continue;
+                    if (tag.tag.getInvisible()) continue;
+                    if (tag.tag.getParticipant().length > 0 &&
+                            !MyUtils.contains(tag.tag.getParticipant(), UserInfoManager.getMyUserID())) continue;
+                    String tagName = tag.tag.getTagName();
+                    TextView textView = new TextView(context);
+                    textView.setText(tagName);
+                    textView.setTextColor(tagColors[tag.tag.getTagID() % tagColors.length]);
+                    textView.setGravity(Gravity.CENTER);
+                    textView.setTextSize(10);
+                    tagLayout.addView(textView);
                 }
             }
         }
@@ -513,12 +542,9 @@ public class MessageView extends LinearLayout{
         {
             boolean flag = false;
             for (int tagID : mInfo.getTagID()) {
-                TagInfoManager.TagInfo tag = TagInfoManager.findTagByID(tagID);
-                if (tag != null) {
-                    if (tag.tag.getTagName().equals("confirmation")){
-                        flag = true;
-                        break;
-                    }
+                if (tagID == TagInfoManager.CONFIRMATION_TAG_ID) {
+                    flag = true;
+                    break;
                 }
             }
             ImageButton iv = (ImageButton)findViewById(R.id.receivedButton);
@@ -527,10 +553,12 @@ public class MessageView extends LinearLayout{
                     @Override
                     public void onClick(View v) {
                         //タッチ時のダイアログを作成
+                        final ProgressDialog progressDialog = MyUtils.createPorgressDialog();
+                        progressDialog.show();
                         new ServerTask(context, "既読の取得に失敗しました") {
                             @Override
                             public void doInSubThread() throws SwallowException {
-                                MessageView.this.mInfo = SCM.swallow.findMessage(null, null, null, null, new Integer[]{mInfo.getPostID()}, null, null, null, null, null, null, null, null)[0];
+                                MessageView.this.mInfo = SCM.swallow.findMessage(null, null, null, null, new Integer[]{mInfo.getPostID()}, null, null, null, null, null, null, null)[0];
                             }
 
                             @Override
@@ -556,6 +584,7 @@ public class MessageView extends LinearLayout{
                                             LinearLayout l = new LinearLayout(context);
                                             l.setLayoutParams(MyUtils.getLayoutparams(MyUtils.WC, MyUtils.WC));
                                             l.setOrientation(LinearLayout.VERTICAL);
+                                            l.setGravity(Gravity.CENTER_HORIZONTAL);
                                             l.addView(iv);
                                             l.addView(tv);
                                             layout.addView(l);
@@ -566,6 +595,7 @@ public class MessageView extends LinearLayout{
                                         dialog.show();
                                     }
                                 }
+                                progressDialog.dismiss();
                             }
                         };
                     }
@@ -592,11 +622,6 @@ public class MessageView extends LinearLayout{
                 //キーボードを隠す
                 context.hideKeyboard(paramView);
                 context.scrollView.requestFocus();
-                //アンケート
-                String value = MyUtils.sp.getString("A" + mInfo.getPostID(), null);
-                if (value == null) {
-
-                }
             }
         });
 
@@ -624,12 +649,12 @@ public class MessageView extends LinearLayout{
         TextView textView = new TextView(TalkActivity.singleton);
         textView.setLayoutParams(MyUtils.getLayoutparams(MyUtils.MP, MyUtils.WC));
         textView.setTextColor(Color.BLACK);
-        textView.setTextSize(12);
+        textView.setTextSize(14);
         textView.setText(message);
-        int yojoTagID = TagInfoManager.findTagByName("yojo").tag.getTagID();
         for (int tagID : mInfo.getTagID()) {
-            if (yojoTagID == tagID) {
+            if (TagInfoManager.YOJO_TAG_ID == tagID) {
                 textView.setTypeface(MyUtils.yojoFont);
+                textView.setTextSize(35);
                 break;
             }
         }
@@ -641,27 +666,42 @@ public class MessageView extends LinearLayout{
         return codeView;
     }
 
-    public final void refleshOnUserInfoChanged() {
+    public final void refreshOnUserInfoChanged() {
         boolean isYojo = false;
-        int yojoTagID = TagInfoManager.findTagByName("yojo").tag.getTagID();
         for (int tagID : mInfo.getTagID()) {
-            if (yojoTagID == tagID) {
+            if (TagInfoManager.YOJO_TAG_ID == tagID) {
                 isYojo = true;
                 break;
             }
         }
         View v = this.getChildAt(0);
         final  UserInfo sender = UserInfoManager.findUserByID(mInfo.getUserID());
-        //アイコン
-        {
-            ImageView iconView = (ImageView)v.findViewById(R.id.icon_image);
-            iconView.setImageBitmap(sender.profileImage);
-        }
+        if (sender != null) {
+            //アイコン
+            {
+                ImageView iconView = (ImageView) v.findViewById(R.id.icon_image);
+                iconView.setImageBitmap(sender.profileImage);
+            }
 
-        //名前
-        {
-            TextView nameView = (TextView)v.findViewById(R.id.name_text);
-            nameView.setText(sender.user.getUserName());
+            //名前
+            {
+                TextView nameView = (TextView) v.findViewById(R.id.name_text);
+                nameView.setText(sender.user.getUserName());
+            }
+
+            //ふぁぼ
+            {
+                final TextView favNumView = (TextView) v.findViewById(R.id.fav_num_text);
+                favNumView.setText(String.valueOf(favCount = mInfo.getFavCount()));
+            }
+        }
+    }
+
+    public final void refreshOnServerThraed() {
+        try {
+            mInfo = SCM.swallow.findMessage(null, null, null, null, new Integer[]{mInfo.getPostID()}, null, null, null, null, null, null, null)[0];
+        } catch (SwallowException e) {
+            e.printStackTrace();
         }
     }
 

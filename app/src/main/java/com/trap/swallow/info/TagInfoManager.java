@@ -1,14 +1,19 @@
 package com.trap.swallow.info;
 
+import android.widget.CheckBox;
+
 import com.trap.swallow.server.SCM;
 import com.trap.swallow.server.Swallow;
 import com.trap.swallow.server.SwallowException;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.trap.swallow.server.Swallow.Tag;
+import com.trap.swallow.swallow.R;
 import com.trap.swallow.talk.MyUtils;
+import com.trap.swallow.talk.TalkActivity;
 
 /**
  * Created by sobayaou on 2015/06/08.
@@ -17,6 +22,12 @@ public final class TagInfoManager {
 
     private static final String SELECTED_TAG_KEY = "TAG_SELECTED4";
     private static final String NOTIFY_TAG_KEY = "TAG_NOTIFY4";
+    public static final int EDITED_TAG_ID = 1;
+    public static final int DELETED_TAG_ID = 2;
+    public static final int CONFIRMATION_TAG_ID = 3;
+    public static final int YOJO_TAG_ID = 4;
+    public static final int ANONYMOUS_TAG_ID = 5;
+    public static final int IMPORTANT_TAG_ID = 6;
 
     private static List<TagInfo> tagInfoList = Collections.synchronizedList(new ArrayList<TagInfo>());
 
@@ -33,8 +44,8 @@ public final class TagInfoManager {
             tagInfoList.add(new TagInfo(t));
 
         if (!hasVisibleTag()) {
-            TagInfoManager.TagInfo newTag = TagInfoManager.addTag("general", true);
-            TagInfoManager.selectTag(newTag);
+            TagInfo newTag = addTag("!general", null, true);
+            selectTag(newTag);
         }
 
         for (TagInfo t : getSelectedTag()) {
@@ -66,9 +77,11 @@ public final class TagInfoManager {
         else {
             String[] str = MyUtils.sp.getString(NOTIFY_TAG_KEY, null).split(",");
             for (String s : str) {
-                if (findTagByID(Integer.parseInt(s)) == null) {
-                    setAllNotification();
-                    break;
+                if (s.length() > 0) {
+                    if (findTagByID(Integer.parseInt(s)) == null) {
+                        setAllNotification();
+                        break;
+                    }
                 }
             }
         }
@@ -79,7 +92,6 @@ public final class TagInfoManager {
         for (TagInfo t : tagInfoList)
             if (t.tag.getTagID() == ID)
                 return t;
-        reload();
         for (TagInfo t : tagInfoList)
             if (t.tag.getTagID() == ID)
                 return t;
@@ -101,6 +113,7 @@ public final class TagInfoManager {
         int count = 0;
         for (TagInfo t : tagInfoList) {
             if (t.tag.getInvisible() == visible) continue;
+            if (t.tag.getParticipant().length != 0) continue;
             if (index == count) return t;
             count++;
         }
@@ -109,16 +122,35 @@ public final class TagInfoManager {
         count = 0;
         for (TagInfo t : tagInfoList) {
             if (t.tag.getInvisible() == visible) continue;
+            if (t.tag.getParticipant().length != 0) continue;
             if (index == count) return t;
             count++;
         }
         return null;
     }
 
-    public static TagInfo addTag(String name, boolean visible) {
+    public static TagInfo findGroupTagByIndex(int index) {
+        int count = 0;
+        for (TagInfo t : tagInfoList) {
+            if (!MyUtils.contains(t.tag.getParticipant(), UserInfoManager.getMyUserID())) continue;
+            if (index == count) return t;
+            count++;
+        }
+        reload();
+
+        count = 0;
+        for (TagInfo t : tagInfoList) {
+            if (!MyUtils.contains(t.tag.getParticipant(), UserInfoManager.getMyUserID())) continue;
+            if (index == count) return t;
+            count++;
+        }
+        return null;
+    }
+
+    public static TagInfo addTag(String name, Integer[] participants, boolean visible) {
         TagInfo newTag;
         try {
-            newTag = new TagInfo(SCM.sendAddTag(name, !visible));
+            newTag = new TagInfo(SCM.swallow.createTag(name, participants, !visible, null));
         } catch (SwallowException e) {
             e.printStackTrace();
             return null;
@@ -169,8 +201,10 @@ public final class TagInfoManager {
         ArrayList<TagInfo> result = new ArrayList<>();
         String[] notificationIDs = MyUtils.sp.getString(NOTIFY_TAG_KEY, null).split(",");
         for (String notification : notificationIDs) {
-            int notificationID = Integer.parseInt(notification);
-            result.add(findTagByID(notificationID));
+            if (notification.length() > 0) {
+                int notificationID = Integer.parseInt(notification);
+                result.add(findTagByID(notificationID));
+            }
         }
         return result.toArray(new TagInfo[0]);
     }
@@ -179,8 +213,10 @@ public final class TagInfoManager {
         ArrayList<Integer> result = new ArrayList<>();
         String[] notificationIDs = MyUtils.sp.getString(NOTIFY_TAG_KEY, null).split(",");
         for (String notification : notificationIDs) {
-            int notificationID = Integer.parseInt(notification);
-            result.add(notificationID);
+            if (notification.length() > 0) {
+                int notificationID = Integer.parseInt(notification);
+                result.add(notificationID);
+            }
         }
         return result.toArray(new Integer[0]);
     }
@@ -205,12 +241,17 @@ public final class TagInfoManager {
                 array.add(tag.tag.getTagID());
         }
         //既読をつけるかどうかでタグを追加
-        if (MyUtils.getReceivedFlag()) {
-            array.add(3);
+        if (MyUtils.getReceivedFlag() && !array.contains(CONFIRMATION_TAG_ID)) {
+            array.add(CONFIRMATION_TAG_ID);
         }
         //幼女かどうかでタグを追加
-        if (MyUtils.sp.getBoolean(MyUtils.YOJO_CHECK_KEY, false)) {
-            array.add(4);
+        if (MyUtils.sp.getBoolean(MyUtils.YOJO_CHECK_KEY, false) && !array.contains(YOJO_TAG_ID)) {
+            array.add(YOJO_TAG_ID);
+        }
+        //強制通知をつけるかどうかでタグを追加
+        if (((CheckBox)TalkActivity.singleton.findViewById(R.id.mention_check)).isChecked()
+                && !array.contains(IMPORTANT_TAG_ID)) {
+            array.add(IMPORTANT_TAG_ID);
         }
         return array.toArray(new Integer[0]);
     }
@@ -239,7 +280,7 @@ public final class TagInfoManager {
     public static String getSelectedTagText() {
         StringBuilder sb = new StringBuilder();
         for (TagInfo t : tagInfoList) {
-            if (t.isSelected) {
+            if (t.isSelected && !t.tag.getInvisible()) {
                 sb.append(t.tag.getTagName());
                 sb.append(',');
             }
@@ -253,10 +294,30 @@ public final class TagInfoManager {
     public static int getVisibleTagNum() {
         int count = 0;
         for (TagInfo t : tagInfoList) {
-            if (!t.tag.getInvisible())
+            if (!t.tag.getInvisible() && t.tag.getParticipant().length == 0)
                 count++;
         }
         return count;
+    }
+
+    public static int getGroupTagNum() {
+        int count = 0;
+        for (TagInfo t : tagInfoList) {
+            if (t.tag.getInvisible()) continue;
+            if (t.tag.getParticipant().length == 0) continue;
+            if (!MyUtils.contains(t.tag.getParticipant(), UserInfoManager.getMyUserID())) continue;
+                count++;
+        }
+        return count;
+    }
+
+    public static final Integer[] getObserveTagIDInRunning() {
+        ArrayList<Integer> result = new ArrayList<>();
+        for (TagInfo tagInfo : tagInfoList) {
+            if (tagInfo.isSelected())
+                result.add(tagInfo.tag.getTagID());
+        }
+        return result.toArray(new Integer[0]);
     }
 
     public static class TagInfo {

@@ -23,7 +23,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
 import android.util.Base64;
 
 /*
@@ -50,7 +49,7 @@ public class SwallowSecurity implements Serializable {
 	 * APIアクションを実行するためのクラスSwallowを取得
 	 */
 	public Swallow getSwallow(){
-		return new SwallowImpl(this);
+		return new SwallowClient(this);
 	}
 
 	/*
@@ -127,9 +126,9 @@ public class SwallowSecurity implements Serializable {
 	 * ログイン処理
 	 * 参考: https://gist.github.com/kazsw/1a6242f83da0cf61a84e
 	 */
-	public SwallowSecurity login(String userName, String password) throws SwallowException {
+	public SwallowSecurity login(String email, String password) throws SwallowException {
 		try {
-			String param = "user=" + userName + "&pass=" + password + "&key=" + base64Enc(key) + "&iv=" + base64Enc(iv);
+			String param = "email=" + email + "&pass=" + password + "&key=" + base64Enc(key) + "&iv=" + base64Enc(iv);
 			String[] resp = httpPost("auth", "auth=login&data=" + base64Enc(rsaEnc(fetchKey(), param.getBytes()))).split(": ");
 
 			if("OK".equals(resp[0])){

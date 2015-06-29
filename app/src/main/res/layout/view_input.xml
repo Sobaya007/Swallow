@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="top"
-    android:orientation="vertical" >
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="top"
+                android:orientation="vertical" >
 
     <LinearLayout
         android:id="@+id/input_top_option_layout"
@@ -75,7 +75,7 @@
                 android:id="@+id/file_upload_button_layout"
                 android:layout_width="0sp"
                 android:layout_height="50sp"
-                android:layout_weight="0.25"
+                android:layout_weight="0.2"
                 android:orientation="horizontal"
                 android:gravity="center">
                 <com.trap.swallow.talk.FileClipView
@@ -87,7 +87,7 @@
             <LinearLayout
                 android:layout_width="0sp"
                 android:layout_height="50sp"
-                android:layout_weight="0.25"
+                android:layout_weight="0.2"
                 android:gravity="center">
                 <CheckBox
                     android:id="@+id/checkReceivedBox"
@@ -101,7 +101,7 @@
             <LinearLayout
                 android:layout_width="0sp"
                 android:layout_height="50sp"
-                android:layout_weight="0.25"
+                android:layout_weight="0.2"
                 android:gravity="center">
                 <ImageButton
                     android:id="@+id/enqueteButton"
@@ -114,14 +114,31 @@
             <LinearLayout
                 android:layout_width="0sp"
                 android:layout_height="50sp"
-                android:layout_weight="0.25"
+                android:layout_weight="0.2"
                 android:gravity="center">
                 <Button
                     android:id="@+id/codeInsertButton"
                     android:layout_width="58sp"
                     android:layout_height="25sp"
                     android:background="@drawable/code_button_selector"/>
-            </LinearLayout>/
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0sp"
+                android:layout_height="50sp"
+                android:layout_weight="0.2"
+                android:orientation="vertical"
+                android:gravity="center">
+                <CheckBox
+                    android:id="@+id/mention_check"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/mention"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#f00"
+                    android:text="強制通知"/>
+            </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
 

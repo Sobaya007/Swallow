@@ -2,6 +2,8 @@ package com.trap.swallow.talk;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
@@ -43,6 +45,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -67,6 +70,7 @@ import com.trap.swallow.swallow.R;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -83,6 +87,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 	private static final int SETTING_BUTTON_ID = 3;
 	private static final int LOGOUT_BUTTON_ID = 4;
 	private static final int PASTE_BUTTON_ID = 5;
+	private static final int SCHEDULE_BUTTON_ID = 6;
 
 	public ListView scrollView;
 
@@ -99,9 +104,12 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 	private AlertDialog tagSelectDialog;
 	private OnMultiChoiceClickListener tagChoiceListener;
 	private OnShowListener tagSelectDialogShowListener;
-
 	private AlertDialog.Builder tagAddDialogBuilder;
 	private AlertDialog tagAddDialog;
+	private AlertDialog.Builder tagDeleteDialogBuilder;
+	private AlertDialog tagDeleteDialog;
+	private OnMultiChoiceClickListener tagDeleteChoiceListener;
+	private ArrayList<TagInfoManager.TagInfo> deleteTargetTag = new ArrayList<>();
 	private EditText tagAddInput;
 	private AlertDialog.Builder enqueteDialogBuilder;
 	private AlertDialog enqueteDialog;
@@ -113,11 +121,10 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 	private View settingView;
 	private View settingTagView;
 	private View mainView;
-
 	private BackgroundView bgView;
 	private FileInfo userImageFile; //設定変更時の一時保存用
-
 	private final ArrayList<Boolean> tmpList = new ArrayList<>();
+	private TimerTask timerTask;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +136,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 
 		ProgressDialog progressDialog = MyUtils.createPorgressDialog();
 		progressDialog.show();
+		MessageViewAdapter.progressDialog = progressDialog;
 
 		//GCMへの登録
 		initGCM();
@@ -158,6 +166,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		initFileUploadButton();
 		initTagSearchBox();
 		initUserSearchBox();
+		initPrivateSearchBox();
 		initDrawer();
 		initTagSelectDialog();
 		initEnqueteButton();
@@ -165,14 +174,38 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		initInsertCodeButton();
 		initSetting();
 		initRefreshWidget();
+		initPrefernceDeleteButton();
 
 		MyUtils.scrollDown();
 
-		progressDialog.dismiss();
-
 		//別スレッドを起動
 		Timer t = new Timer();
-		t.schedule(new Task(), 0, 1000); //50FPS
+		t.schedule(timerTask = new Task(), 0, 1000);
+	}
+
+	@Override
+	protected void onRestart() {
+		Timer t = new Timer();
+		t.schedule(timerTask = new Task(), 0, 1000);
+		new ServerTask(this, "") {
+			@Override
+			public void doInSubThread() throws SwallowException {
+				setObserveForRunning();
+			}
+		};
+		super.onRestart();
+	}
+
+	@Override
+	protected void onStop() {
+		if (timerTask != null)
+			timerTask.cancel();
+		try {
+			SCM.swallow.modifyUser(null, null, null, null, null, TagInfoManager.getNotificaionTagID(), null);
+		} catch (SwallowException e) {
+			e.printStackTrace();
+		}
+		super.onStop();
 	}
 
 	@Override
@@ -210,6 +243,11 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 				break;
 			case LOGOUT_BUTTON_ID:
 				logout();
+				break;
+			case PASTE_BUTTON_ID:
+				paste();
+				break;
+			case SCHEDULE_BUTTON_ID:
 				break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -347,11 +385,14 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		MenuItem item4 = menu.add(0, DOWN_BUTTON_ID, 2, "下へ")
 				.setIcon(R.drawable.scroll_down);
 		MenuItem item5 = menu.add(0, LOGOUT_BUTTON_ID, 4, "ログアウト");
-		MenuItemCompat.setShowAsAction(item, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-		MenuItemCompat.setShowAsAction(item2, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+		MenuItem item6 = menu.add(0, PASTE_BUTTON_ID, 5, "貼り付け")
+				.setIcon(R.drawable.abc_ic_menu_paste_mtrl_am_alpha);
+		MenuItemCompat.setShowAsAction(item, MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+		MenuItemCompat.setShowAsAction(item2, MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
 		MenuItemCompat.setShowAsAction(item3, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 		MenuItemCompat.setShowAsAction(item4, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 		MenuItemCompat.setShowAsAction(item5, MenuItemCompat.SHOW_AS_ACTION_NEVER);
+		MenuItemCompat.setShowAsAction(item6, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -427,6 +468,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 				//tvManagerを初期化
 				try {
 					TalkManager.init();
+					setObserveForRunning();
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
@@ -437,10 +479,12 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 			@Override
 			protected void onPostExecute(Boolean aBoolean) {
 				//TalkManager.initの終わったあとにされる処理
+				TalkManager.removeAllMessageViews();
 				TalkManager.pushMessageList(); //このスレッドでやらないとまずい処理
 				//タグ一覧表示ビューの設定
 				initTagSelectList();
 				initUserSelectList();
+				initPrivateSelectList();
 			}
 		};
 
@@ -560,6 +604,11 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		});
 	}
 
+	private final void initDrawerContent() {
+		ExpandableListView tagList = (ExpandableListView)findViewById(R.id.drawer_expandable);
+		List<Map<String, View>> parent = new ArrayList<>();
+	}
+
 	private final void initTagSearchBox() {
 		final EditText searchTagBox = (EditText)findViewById(R.id.drawer_tag_search_box);
 		searchTagBox.addTextChangedListener(new TextWatcher() {
@@ -567,9 +616,8 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				String searchWord = searchTagBox.getText().toString();
 				boolean emptyFlag = searchWord.length() == 0;
-				//				searchWord = "^" + searchWord;
 
-				ArrayList<String> tag = new ArrayList<String>();
+				ArrayList<String> tag = new ArrayList<>();
 
 				//タグリストの中から先頭が一致するものを検索
 				if (emptyFlag) {
@@ -693,6 +741,74 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		});
 	}
 
+	private final void initPrivateSelectList() {
+		final ListView tagSelectList = (ListView)findViewById(R.id.drawer_private_select_list);
+		tagSelectList.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+									long arg3) {
+				String tagName = (String) tagSelectList.getItemAtPosition(position);
+				TagInfoManager.TagInfo selectedTag = TagInfoManager.findTagByName(tagName);
+				TagInfoManager.selectTag(selectedTag);
+			}
+		});
+	}
+
+	private final void initPrivateSearchBox() {
+		final EditText searchTagBox = (EditText)findViewById(R.id.drawer_private_search_box);
+		searchTagBox.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				String searchWord = searchTagBox.getText().toString();
+				boolean emptyFlag = searchWord.length() == 0;
+
+				ArrayList<String> tag = new ArrayList<>();
+
+				//タグリストの中から先頭が一致するものを検索
+				if (emptyFlag) {
+					for (int i = 0; i < TagInfoManager.getGroupTagNum(); i++) {
+						tag.add(TagInfoManager.findGroupTagByIndex(i).tag.getTagName());
+					}
+				} else {
+					for (int i = 0; i < TagInfoManager.getGroupTagNum(); i++) {
+						String tagName = TagInfoManager.findGroupTagByIndex(i).tag.getTagName();
+						if (tagName.startsWith(searchWord)) {
+							tag.add(tagName);
+						}
+					}
+				}
+				String[] members = new String[tag.size()];
+				for (int i = 0; i < members.length; i++)
+					members[i] = tag.get(i);
+				//tagSelectListに検索結果を適用
+				ArrayAdapter<String> adapter = new ArrayAdapter<>(TalkActivity.this,
+						android.R.layout.simple_list_item_multiple_choice, members);
+				ListView tagSelectList = (ListView) findViewById(R.id.drawer_private_select_list);
+				tagSelectList.setAdapter(adapter);
+				//選択されている文字列を羅列
+				ArrayList<String> selectedTagNameList = new ArrayList<>();
+				for (int i = 0; i < TagInfoManager.getGroupTagNum(); i++) {
+					TagInfoManager.TagInfo t = TagInfoManager.findGroupTagByIndex(i);
+					if (t.isSelected())
+						selectedTagNameList.add(t.tag.getTagName());
+				}
+				//tagSelectListに選択状況を適用
+				for (int i = 0; i < members.length; i++) {
+					tagSelectList.setItemChecked(i, selectedTagNameList.contains(members[i]));
+				}
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+										  int after) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+	}
+
 	private final void initDrawer() {
 		DrawerLayout drawer = (DrawerLayout)findViewById(R.id.drawer_layout);
 
@@ -705,6 +821,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 
 				updateTagSelectList();
 				updateUserSelectList();
+				updatePrivateSelectList();
 
 				saveTagSelect();
 
@@ -719,6 +836,8 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 			}
 		};
 		updateTagSelectList();
+		updatePrivateSelectList();
+		updateUserSelectList();
 		toggle.setHomeAsUpIndicator(R.drawable.ic_drawer);
 		drawer.setDrawerListener(toggle);
 		//影
@@ -754,6 +873,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		//ボタン設定
 		tagSelectDialogBuilder.setPositiveButton(R.string.ok_text, null);
 		tagSelectDialogBuilder.setNeutralButton(R.string.tag_add_button_text, null);
+		tagSelectDialogBuilder.setNegativeButton("タグ削除♡", null);
 
 
 		//タグ追加ダイアログの設定
@@ -804,10 +924,65 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 						onTagAddButtonPressed();
 					}
 				});
+				Button deleteButton = tagSelectDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+				deleteButton.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						tagDeleteDialog.show();
+					}
+				});
 			}
 		};
 
 		tagAddDialog = tagAddDialogBuilder.create();
+
+		tagDeleteDialogBuilder = new AlertDialog.Builder(this);
+		tagDeleteDialogBuilder.setTitle("タグの削除");
+		tagDeleteDialogBuilder.setPositiveButton("消しますとも", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(TalkActivity.this);
+				confirmDialogBuilder.setTitle("本当に？");
+				confirmDialogBuilder.setMessage("本当に削除してよろしいですか？");
+				confirmDialogBuilder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						new ServerTask(TalkActivity.this, "タグの削除に失敗しました") {
+							@Override
+							public void doInSubThread() throws SwallowException {
+								for (TagInfoManager.TagInfo tagInfo : deleteTargetTag)
+									SCM.swallow.createTag(null, null, null, tagInfo.tag.getTagID());
+								TagInfoManager.reload();
+							}
+
+							@Override
+							protected void onPostExecute(Boolean aBoolean) {
+								if (aBoolean) {
+									deleteTargetTag.clear();
+								}
+							}
+						};
+					}
+				});
+				confirmDialogBuilder.setNegativeButton(R.string.cancel_text, null);
+				confirmDialogBuilder.show();
+			}
+		});
+		tagDeleteDialogBuilder.setNegativeButton(R.string.cancel_text, null);
+
+		tagDeleteDialog = tagDeleteDialogBuilder.create();
+
+		tagDeleteChoiceListener = new OnMultiChoiceClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+				TagInfoManager.TagInfo tagInfo = TagInfoManager.findTagByIndex(which, true);
+				if (deleteTargetTag.contains(tagInfo)) {
+					deleteTargetTag.remove(tagInfo);
+				} else {
+					deleteTargetTag.add(tagInfo);
+				}
+			}
+		};
 	}
 
 	private final void initEnqueteButton() {
@@ -958,7 +1133,6 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 					protected String doInBackground(Void[] params) {
 						String userName = ((TextView) findViewById(R.id.setting_name)).getText().toString();
 						String profile = ((TextView) findViewById(R.id.setting_profile)).getText().toString();
-						String twitterText = ((TextView) findViewById(R.id.setting_twitter)).getText().toString();
 						String mailText1 = ((TextView) findViewById(R.id.setting_mail1)).getText().toString();
 						String mailText2 = ((TextView) findViewById(R.id.setting_mail2)).getText().toString();
 						String password = ((TextView) findViewById(R.id.setting_password)).getText().toString();
@@ -967,8 +1141,6 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 							userName = null;
 						if (profile != null && profile.length() == 0)
 							profile = null;
-						if (twitterText != null && twitterText.length() == 0)
-							twitterText = null;
 						if (mailText1 != null && mailText1.length() == 0)
 							mailText1 = null;
 						if (mailText2 != null && mailText2.length() == 0)
@@ -999,16 +1171,13 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 						Swallow.UserDetail user = (Swallow.UserDetail) UserInfoManager.getMyUserInfo().user;
 						if ((userName != null && userName.equals(user.getUserName()) == false)
 								|| (profile != null && profile.equals(user.getProfile()) == false)
-								|| (twitterText != null && twitterText.equals(user.getTwitter())) == false
 								|| (mailText1 != null && mailText1.equals(user.getEmail()) == false)
 								|| (mailText2 != null && mailText2.equals(user.getEmail()) == false)
 								|| (imageID != null && imageID.equals(user.getImage()) == false)
 								|| password != null) {
 							try {
 								//サーバーに変更を送信
-								SCM.swallow.modifyUser(
-										userName, profile, imageID, password, mailText1 + "@" + mailText2, null, twitterText, null, null,
-										null, null);
+								SCM.swallow.modifyUser(userName, profile, imageID, password, mailText1 + "@" + mailText2, null, null);
 								TalkManager.refreshOnUserInfoChanged_1();
 							} catch (SwallowException e) {
 								e.printStackTrace();
@@ -1076,6 +1245,26 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		});
 	}
 
+	private final void initPrefernceDeleteButton() {
+		Button pDeleteButton = (Button)findViewById(R.id.preference_delete_button);
+		pDeleteButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(TalkActivity.this);
+				builder.setMessage("本当に削除してよろしいですか？");
+				builder.setNegativeButton(R.string.cancel_text, null);
+				builder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						MyUtils.sp.edit().clear().commit();
+						logout();
+					}
+				});
+				builder.show();
+			}
+		});
+	}
+
 	private final boolean submitMessage(final String text, final View v) {
 		if (canSend(text)) {
 			//投稿
@@ -1088,7 +1277,6 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 				@Override
 				protected void onPostExecute(Boolean aBoolean) {
 					if (aBoolean) {
-						MyUtils.scrollDown();
 						TalkManager.endPost();
 						hideKeyboard(v);
 					}
@@ -1101,18 +1289,29 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 
 	private final void showTagSelectDialog() {
 		//タグリストをStringの配列にする
-		final String[] items = new String[TagInfoManager.getVisibleTagNum()];
-		for (int i = 0 ; i < items.length; i++)
+		final String[] items = new String[TagInfoManager.getVisibleTagNum() + TagInfoManager.getGroupTagNum()];
+		for (int i = 0 ; i < TagInfoManager.getVisibleTagNum(); i++)
 			items[i] = TagInfoManager.findTagByIndex(i, true).tag.getTagName();
+		for (int i = 0 ; i < TagInfoManager.getGroupTagNum(); i++)
+			items[i+TagInfoManager.getVisibleTagNum()] = TagInfoManager.findGroupTagByIndex(i).tag.getTagName();
+
 		boolean[] selectionList = new boolean[items.length];
-		for (int i = 0; i < selectionList.length; i++)
+		for (int i = 0; i < TagInfoManager.getVisibleTagNum(); i++)
 			selectionList[i] = TagInfoManager.findTagByIndex(i, true).isSelected();
+		for (int i = 0; i < TagInfoManager.getGroupTagNum(); i++)
+			selectionList[i+TagInfoManager.getVisibleTagNum()] = TagInfoManager.findGroupTagByIndex(i).isSelected();
 		tagSelectDialogBuilder.setMultiChoiceItems(items, selectionList,
 				tagChoiceListener) ;
+
 		//ダイアログを作成
 		tagSelectDialog = tagSelectDialogBuilder.create();
 		tagSelectDialog.setOnShowListener(tagSelectDialogShowListener);
 		tagSelectDialog.show();
+
+		selectionList = new boolean[items.length];
+		tagDeleteDialogBuilder.setMultiChoiceItems(items, selectionList,
+				tagDeleteChoiceListener);
+		tagDeleteDialog = tagDeleteDialogBuilder.create();
 	}
 
 	private final void showEnqueteDialog() {
@@ -1230,9 +1429,6 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		//名前を設定
 		EditText nameView = (EditText)findViewById(R.id.setting_name);
 		nameView.setText(myself.getUserName());
-		//Twitterを設定
-		EditText twitterView = (EditText)findViewById(R.id.setting_twitter);
-		twitterView.setText(myself.getTwitter());
 		//メアドを設定
 		{
 			String[] str = myself.getEmail().split("@");
@@ -1306,6 +1502,14 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 						InputMethodManager.HIDE_NOT_ALWAYS);
 	}
 
+	private final void setObserveForRunning() {
+		try {
+			SCM.swallow.modifyUser(null, null, null, null, null, TagInfoManager.getObserveTagIDInRunning(), null);
+		} catch (SwallowException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private final void logout() {
 		String serial = MyUtils.sp.getString(MyUtils.SWALLOW_SECURITY_SERIALIZE_CODE, null);
 		try {
@@ -1319,6 +1523,25 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 		finish();
+	}
+
+	private final void paste() {
+		View view = getCurrentFocus();
+		if (view != null && view instanceof EditText) {
+			ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+			ClipData cd = cm.getPrimaryClip();
+			if(cd != null){
+				ClipData.Item item = cd.getItemAt(0);
+				EditText pasteTarget = (EditText)view;
+				int selection = pasteTarget.getSelectionStart();
+				String current = pasteTarget.getText().toString();
+				if (selection == -1) {
+					pasteTarget.setText(current + item.getText());
+				} else {
+					input.setText(current.substring(0, selection) + item.getText() + current.substring(selection, current.length()));
+				}
+			}
+		}
 	}
 
 	private final void updateTagSelectList() {
@@ -1337,6 +1560,27 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 			//tagSelectListに選択状況を適用
 			for (int i = 0; i < members.length; i++) {
 				tagSelectList.setItemChecked(i, TagInfoManager.findTagByIndex(i, true).isSelected());
+			}
+		}
+
+	}
+
+	private final void updatePrivateSelectList() {
+		//privateSelectListを更新
+		{
+			ListView tagSelectList = (ListView) findViewById(R.id.drawer_private_select_list);
+			final String[] members = new String[TagInfoManager.getGroupTagNum()];
+			{
+				//adapterを生成・設定。
+				for (int i = 0; i < members.length; i++)
+					members[i] = TagInfoManager.findGroupTagByIndex(i).tag.getTagName();
+				ArrayAdapter<String> tagList = new ArrayAdapter<>(TalkActivity.this,
+						android.R.layout.simple_list_item_multiple_choice, members);
+				tagSelectList.setAdapter(tagList);
+			}
+			//privateSelectListに選択状況を適用
+			for (int i = 0; i < members.length; i++) {
+				tagSelectList.setItemChecked(i, TagInfoManager.findGroupTagByIndex(i).isSelected());
 			}
 		}
 
@@ -1390,6 +1634,7 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 				protected ArrayList<MessageView> doInBackground(Void... params) {
 					//MessageViewのリストを更新
 					try {
+						setObserveForRunning();
 						return TalkManager.refreshOnTagSelectChanged();
 					} catch (SwallowException e) {
 						e.printStackTrace();
@@ -1438,24 +1683,45 @@ public class TalkActivity extends AppCompatActivity implements SensorEventListen
 		final String tag = tagAddInput.getText().toString().trim();
 		//何か入力されていて、まだそのタグがなかった場合
 		if (tag.length() != 0 && TagInfoManager.findTagByName(tag) == null) {
-			//tagListに新たなタグを追加
-			new ServerTask(this, "タグの追加に失敗しました") {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			final Integer[] selected = {0}; //ポインタとして使用
+			builder.setSingleChoiceItems(new String[]{"グループとして作成", "ただのタグとして作成"}, 0, new DialogInterface.OnClickListener() {
 				@Override
-				public void doInSubThread() throws SwallowException {
-					TagInfoManager.TagInfo t = TagInfoManager.addTag(tag, true);
-					TagInfoManager.selectTag(t);
+				public void onClick(DialogInterface dialog, int which) {
+					selected[0] = which;
 				}
+			});
+			builder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					//tagListに新たなタグを追加
+					new ServerTask(TalkActivity.this, "タグの追加に失敗しました") {
+						@Override
+						public void doInSubThread() throws SwallowException {
+							Integer[] participants;
+							if (selected[0] == 0) {
+								participants = new Integer[]{UserInfoManager.getMyUserID()};
+							} else {
+								participants = new Integer[0];
+							}
+							TagInfoManager.TagInfo t = TagInfoManager.addTag(tag, participants, true);
+							if (t != null)
+								TagInfoManager.selectTag(t);
+						}
 
-				@Override
-				protected void onPostExecute(Boolean aBoolean) {
-					if (aBoolean) {
-						//タグ選択ダイアログを再表示
-						tagSelectDialog.dismiss();
-						showTagSelectDialog();
-					}
-					super.onPostExecute(aBoolean);
+						@Override
+						protected void onPostExecute(Boolean aBoolean) {
+							if (aBoolean) {
+								//タグ選択ダイアログを再表示
+								tagSelectDialog.dismiss();
+								showTagSelectDialog();
+							}
+							super.onPostExecute(aBoolean);
+						}
+					};
 				}
-			};
+			});
+			builder.show();
 		}
 	}
 

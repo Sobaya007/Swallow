@@ -32,7 +32,7 @@ public class MyUtils {
 	public static final String YOJO_CHECK_KEY = "AmIYojo";
 	public static final String MESSAGE_VIEW_KEY = "MV";
 	public static final String HAS_READ_KEY = "READ";
-	public static final String ENQUETE_ANSWER_KEY = "ANSWER";
+	public static final String ENQUETE_ANSWER_KEY = "ANSWER2";
 	public static final String BACKGROUND_ENABLE_KEY = "BG";
 	public static final String MESSAGE_KEY = "Message";
 
@@ -170,7 +170,10 @@ public class MyUtils {
 		return progressDialog;
 	}
 
-	public static float mod(float f1, float f2) {
-		return f1 - f2 * (int)(f1 / f2);
+	public static final <T> boolean contains(T[] array, T target) {
+		for (T t : array)
+			if (t.equals(target))
+				return true;
+		return false;
 	}
 }
